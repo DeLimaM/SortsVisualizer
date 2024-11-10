@@ -1,3 +1,3 @@
 make : 
-	gcc -o out main.c
-	./out -b
+	gcc -o sortviz main.c
+	./sortviz -merge
