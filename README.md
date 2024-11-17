@@ -2,10 +2,10 @@
 
 After opening a terminal in the directory of the project, you can
 Build the the project :
-```build```
+```make```
 
 Add the resulting binary to the user's bin folder :
-```install```
+```make install```
 
 You can remove the binary from the user's bin folder :
-```uninstall```
+```make uninstall```
