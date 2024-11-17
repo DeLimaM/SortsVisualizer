@@ -8,6 +8,7 @@
 
 #define RED "\x1b[31m"
 #define WHITE "\x1b[37m"
+#define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 
 #define TOP_MARGIN 2
@@ -47,14 +48,16 @@ void initCanvas(struct canvas *canvas, int lines, int cols) {
 int swaps = 0;
 int insertions = 0;
 
+int previous_pivot_index = -1;
+
 void drawCounter() {
-  gotoxy(0, 1);
+  gotoxy(0, 2);
   printf("Swaps: %d, Insertions: %d", swaps, insertions);
 }
 
 void drawBar(int value, int index, struct canvas *canvas, const char *color) {
   int max_bar_height = canvas->lines - TOP_MARGIN;
-  for (int i = 0; i < max_bar_height; i++) {
+  for (int i = 0; i < max_bar_height - 1; i++) {
     gotoxy(index, max_bar_height - i + TOP_MARGIN);
     if (i < value * max_bar_height / canvas->cols) {
       printf("%s█%s", color, RESET);
@@ -93,20 +96,31 @@ void drawArrayAfterInsertion(int value, int index, struct canvas *canvas,
   drawCounter();
 }
 
+void drawPivot(int *array, int size, struct canvas *canvas, int pivot) {
+  if (previous_pivot_index >= 0 && previous_pivot_index < size) {
+    drawBar(array[previous_pivot_index], previous_pivot_index, canvas, WHITE);
+  }
+  drawBar(array[pivot], pivot, canvas, GREEN);
+  previous_pivot_index = pivot;
+}
+
 void drawFullArray(int *array, int size, struct canvas *canvas) {
   for (int i = 0; i < size; i++) {
     drawBar(array[i], i, canvas, WHITE);
   }
 }
 
-// ----------------- SORTING ALGORITHMS -----------------
+// ----------------- SORTING ALGORITHMS ----------------
+// sleep time in milliseconds
+int sleep_time = 25;
+
 void bubbleSort(int *array, int size, struct canvas *canvas,
                 void (*afterSwap)(int *, int, struct canvas *, int, int, int)) {
   for (int i = 0; i < size; i++) {
     for (int j = 0; j < size - i - 1; j++) {
       if (array[j] > array[j + 1]) {
         swap(array[j], array[j + 1]);
-        afterSwap(array, size, canvas, j, j + 1, 10);
+        afterSwap(array, size, canvas, j, j + 1, sleep_time);
       }
     }
   }
@@ -124,7 +138,7 @@ void selectionSort(int *array, int size, struct canvas *canvas,
     }
     if (minIndex != i) {
       swap(array[i], array[minIndex]);
-      afterSwap(array, size, canvas, i, minIndex, 10);
+      afterSwap(array, size, canvas, i, minIndex, sleep_time);
     }
   }
 }
@@ -138,11 +152,11 @@ void insertionSort(int *array, int size, struct canvas *canvas,
     int j = i;
     while (j > 0 && array[j - 1] > x) {
       array[j] = array[j - 1];
-      afterInsertion(array[j], j, canvas, size, 10);
+      afterInsertion(array[j], j, canvas, size, sleep_time);
       j--;
     }
     array[j] = x;
-    afterInsertion(array[j], j, canvas, size, 10);
+    afterInsertion(array[j], j, canvas, size, sleep_time);
     i++;
   }
 }
@@ -155,11 +169,11 @@ int partition(int *array, int size, int low, int high, struct canvas *canvas,
     if (array[j] <= pivot) {
       i++;
       swap_ptr(&array[i], &array[j]);
-      afterSwap(array, size, canvas, i, j, 10);
+      afterSwap(array, size, canvas, i, j, sleep_time);
     }
   }
   swap_ptr(&array[i + 1], &array[high]);
-  afterSwap(array, size, canvas, i + 1, high, 10);
+  afterSwap(array, size, canvas, i + 1, high, sleep_time);
   return i + 1;
 }
 
@@ -167,6 +181,7 @@ void quickSort(int *array, int size, int low, int high, struct canvas *canvas,
                void (*afterSwap)(int *, int, struct canvas *, int, int, int)) {
   if (low < high && low >= 0) {
     int pi = partition(array, size, low, high, canvas, afterSwap);
+    drawPivot(array, size, canvas, pi);
     quickSort(array, size, low, pi - 1, canvas, afterSwap);
     quickSort(array, size, pi + 1, high, canvas, afterSwap);
   }
@@ -195,20 +210,20 @@ void merge(int *array, int size, int low, int mid, int high,
       array[k] = R[j];
       j++;
     }
-    afterInsertion(array[k], k, canvas, size, 10);
+    afterInsertion(array[k], k, canvas, size, sleep_time);
     k++;
   }
 
   while (i < n1) {
     array[k] = L[i];
-    afterInsertion(array[k], k, canvas, size, 10);
+    afterInsertion(array[k], k, canvas, size, sleep_time);
     i++;
     k++;
   }
 
   while (j < n2) {
     array[k] = R[j];
-    afterInsertion(array[k], k, canvas, size, 10);
+    afterInsertion(array[k], k, canvas, size, sleep_time);
     j++;
     k++;
   }
@@ -240,7 +255,7 @@ void drunkSort(int *array, int size, struct canvas *canvas,
     for (int i = 0; i < size; i++) {
       int j = random(0, size - 1);
       swap(array[i], array[j]);
-      afterSwap(array, size, canvas, i, j, 10);
+      afterSwap(array, size, canvas, i, j, sleep_time);
     }
   }
 }
@@ -259,17 +274,17 @@ void startSort(int *array, int size, struct canvas *canvas, const char *sort) {
   hide_cursor();
   drawFullArray(array, size, canvas);
 
-  if (strcmp(sort, "bubble") == 0) {
+  if (strcmp(sort, "bubble") == 0 || strcmp(sort, "b") == 0) {
     bubbleSort(array, size, canvas, drawArrayAfterSwap);
-  } else if (strcmp(sort, "selection") == 0) {
+  } else if (strcmp(sort, "selection") == 0 || strcmp(sort, "s") == 0) {
     selectionSort(array, size, canvas, drawArrayAfterSwap);
-  } else if (strcmp(sort, "insertion") == 0) {
+  } else if (strcmp(sort, "insertion") == 0 || strcmp(sort, "i") == 0) {
     insertionSort(array, size, canvas, drawArrayAfterInsertion);
-  } else if (strcmp(sort, "drunk") == 0) {
+  } else if (strcmp(sort, "drunk") == 0 || strcmp(sort, "d") == 0) {
     drunkSort(array, size, canvas, drawArrayAfterSwap);
-  } else if (strcmp(sort, "quick") == 0) {
+  } else if (strcmp(sort, "quick") == 0 || strcmp(sort, "q") == 0) {
     quickSort(array, size, 0, size - 1, canvas, drawArrayAfterSwap);
-  } else if (strcmp(sort, "merge") == 0) {
+  } else if (strcmp(sort, "merge") == 0 || strcmp(sort, "m") == 0) {
     mergeSort(array, size, 0, size - 1, canvas, drawArrayAfterInsertion);
   } else {
     clear_window();
@@ -277,6 +292,19 @@ void startSort(int *array, int size, struct canvas *canvas, const char *sort) {
     printf("Invalid sorting algorithm\n");
     exit(1);
   }
+}
+
+void printUsage() {
+  printf("  Usage: sortviz [OPTIONS]\n");
+  printf("  Options:\n");
+  printf("    --bubble, -b\n");
+  printf("    --selection, -s\n");
+  printf("    --insertion, -i\n");
+  printf("    --drunk, -d\n");
+  printf("    --quick, -q\n");
+  printf("    --merge, -m\n");
+  printf("    --stime <value>\n");
+  printf("  Example: sortviz --bubble --stime 50\n");
 }
 
 // ----------------- SIGNAL HANDLER -----------------
@@ -328,27 +356,45 @@ int main(int argc, char *argv[]) {
 
   set_signal_action();
 
-  while (--argc > 0) {
-    char *arg = *++argv;
-    if (strcmp(arg, "-bubble") == 0) {
-      startSort(array, array_size, &canvas, "bubble");
-    } else if (strcmp(arg, "-selection") == 0) {
-      startSort(array, array_size, &canvas, "selection");
-    } else if (strcmp(arg, "-insertion") == 0) {
-      startSort(array, array_size, &canvas, "insertion");
-    } else if (strcmp(arg, "-drunk") == 0) {
-      startSort(array, array_size, &canvas, "drunk");
-    } else if (strcmp(arg, "-quick") == 0) {
-      startSort(array, array_size, &canvas, "quick");
-    } else if (strcmp(arg, "-merge") == 0) {
-      startSort(array, array_size, &canvas, "merge");
+  const char *sortType = NULL;
+
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "--bubble") == 0 || strcmp(argv[i], "-b") == 0) {
+      sortType = "bubble";
+    } else if (strcmp(argv[i], "--selection") == 0 ||
+               strcmp(argv[i], "-s") == 0) {
+      sortType = "selection";
+    } else if (strcmp(argv[i], "--insertion") == 0 ||
+               strcmp(argv[i], "-i") == 0) {
+      sortType = "insertion";
+    } else if (strcmp(argv[i], "--drunk") == 0 || strcmp(argv[i], "-d") == 0) {
+      sortType = "drunk";
+    } else if (strcmp(argv[i], "--quick") == 0 || strcmp(argv[i], "-q") == 0) {
+      sortType = "quick";
+    } else if (strcmp(argv[i], "--merge") == 0 || strcmp(argv[i], "-m") == 0) {
+      sortType = "merge";
+    } else if (strcmp(argv[i], "--stime") == 0) {
+      if (i + 1 < argc) {
+        sleep_time = atoi(argv[++i]);
+      } else {
+        printf("Error: --stime requires a value\n");
+        printUsage();
+        return 1;
+      }
     } else {
-      printf("Invalid argument\n");
-      printf("  Usage: sortviz [-bubble | -selection | -insertion | -drunk | "
-             "-quick | -merge]\n");
-      printf("  Example: sortviz -bubble\n");
+      printf("Unexpected argument: %s\n", argv[i]);
+      printUsage();
       return 1;
     }
+  }
+
+  if (sortType) {
+    startSort(array, array_size, &canvas, sortType);
+    drawFullArray(array, array_size, &canvas);
+  } else {
+    printf("No sorting algorithm specified\n");
+    printUsage();
+    return 1;
   }
 
   // reset terminal
