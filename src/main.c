@@ -8,7 +8,8 @@
 
 #define RED "\x1b[31m"
 #define WHITE "\x1b[37m"
-#define GREEN "\x1b[32m"
+#define YELLOW "\x1b[33m"
+#define PURPLE "\x1b[35m"
 #define RESET "\x1b[0m"
 
 #define TOP_MARGIN 2
@@ -47,19 +48,22 @@ void initCanvas(struct canvas *canvas, int lines, int cols) {
 // counters
 int swaps = 0;
 int insertions = 0;
+int pivots = 0;
 
 int previous_pivot_index = -1;
 
 void drawCounter() {
   gotoxy(0, 2);
-  printf("Swaps: %d, Insertions: %d", swaps, insertions);
+  printf("%sSwaps%s: %d, %sInsertions%s: %d, %sPivots%s: %d", RED, RESET, swaps,
+         YELLOW, RESET, insertions, PURPLE, RESET, pivots);
 }
 
 void drawBar(int value, int index, struct canvas *canvas, const char *color) {
   int max_bar_height = canvas->lines - TOP_MARGIN;
-  for (int i = 0; i < max_bar_height - 1; i++) {
+  int bar_height = value * max_bar_height / canvas->cols;
+  for (int i = 0; i < max_bar_height; i++) {
     gotoxy(index, max_bar_height - i + TOP_MARGIN);
-    if (i < value * max_bar_height / canvas->cols) {
+    if (i < bar_height) {
       printf("%s█%s", color, RESET);
     } else {
       printf(" ");
@@ -69,7 +73,6 @@ void drawBar(int value, int index, struct canvas *canvas, const char *color) {
 
 void drawArrayAfterSwap(int *array, int size, struct canvas *canvas, int index1,
                         int index2, int sleep_time) {
-  hide_cursor();
   if (index1 >= 0 && index1 < size) {
     drawBar(array[index1], index1, canvas, RED);
   }
@@ -89,7 +92,7 @@ void drawArrayAfterSwap(int *array, int size, struct canvas *canvas, int index1,
 
 void drawArrayAfterInsertion(int value, int index, struct canvas *canvas,
                              int size, int sleep_time) {
-  drawBar(value, index, canvas, RED);
+  drawBar(value, index, canvas, YELLOW);
   sleep(sleep_time);
   drawBar(value, index, canvas, WHITE);
   insertions++;
@@ -100,8 +103,9 @@ void drawPivot(int *array, int size, struct canvas *canvas, int pivot) {
   if (previous_pivot_index >= 0 && previous_pivot_index < size) {
     drawBar(array[previous_pivot_index], previous_pivot_index, canvas, WHITE);
   }
-  drawBar(array[pivot], pivot, canvas, GREEN);
+  drawBar(array[pivot], pivot, canvas, PURPLE);
   previous_pivot_index = pivot;
+  pivots++;
 }
 
 void drawFullArray(int *array, int size, struct canvas *canvas) {
@@ -205,12 +209,13 @@ void merge(int *array, int size, int low, int mid, int high,
   while (i < n1 && j < n2) {
     if (L[i] <= R[j]) {
       array[k] = L[i];
+      afterInsertion(array[k], k, canvas, size, sleep_time);
       i++;
     } else {
       array[k] = R[j];
+      afterInsertion(array[k], k, canvas, size, sleep_time);
       j++;
     }
-    afterInsertion(array[k], k, canvas, size, sleep_time);
     k++;
   }
 
