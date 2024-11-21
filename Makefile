@@ -2,7 +2,7 @@ all: build
 
 build:
 	mkdir -p build
-	clang src/*.c -o build/sortviz
+	gcc src/*.c -o build/sortviz 
 
 clean:
 	rm -rf build
