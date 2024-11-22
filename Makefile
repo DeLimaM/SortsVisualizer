@@ -2,7 +2,7 @@ all: build
 
 build:
 	mkdir -p build
-	gcc src/*.c -o build/sortviz 
+	gcc src/*.c -Iinclude -Llib -o build/sortviz -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 clean:
 	rm -rf build
