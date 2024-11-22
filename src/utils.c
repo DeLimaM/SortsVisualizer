@@ -34,3 +34,8 @@ int *createShuffledArray(int size) {
   shuffle(array, size);
   return array;
 }
+
+void initCanvas(struct canvas *canvas, int lines, int cols) {
+  canvas->lines = lines;
+  canvas->cols = cols;
+}

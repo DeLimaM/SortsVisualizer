@@ -7,6 +7,7 @@
 // ----------------- MAIN -----------------
 int main(int argc, char *argv[]) {
   sortType type = NONE;
+  interfaceType interface = TERMINAL;
   int sleep_time = 50;
 
   for (int i = 1; i < argc; i++) {
@@ -32,6 +33,8 @@ int main(int argc, char *argv[]) {
         printUsage();
         return 1;
       }
+    } else if (strcmp(argv[i], "--gui") == 0) {
+      interface = GUI;
     } else {
       printf("Unexpected argument: %s\n", argv[i]);
       printUsage();
@@ -39,11 +42,17 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (type == NONE) {
+  if (!(type == NONE)) {
+    if (interface == GUI) {
+      doSortInGUI(type, sleep_time);
+    } else {
+      doSortInTerminal(type, sleep_time);
+    }
+  } else {
     printf("Error: no sorting algorithm specified\n");
     printUsage();
     return 1;
-  } else {
-    doSortInTerminal(type, sleep_time);
   }
+
+  return 0;
 }

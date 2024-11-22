@@ -28,8 +28,15 @@ typedef enum {
   MERGE,
   NONE
 } sortType;
+typedef enum { TERMINAL, GUI } interfaceType;
+
+struct canvas {
+  int lines;
+  int cols;
+};
 
 int *createShuffledArray(int size);
 void printUsage();
+void initCanvas(struct canvas *canvas, int lines, int cols);
 
 #endif // UTILS_H
