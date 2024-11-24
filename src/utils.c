@@ -1,4 +1,6 @@
 #include "utils.h"
+#include "sorts.h"
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,7 +37,33 @@ int *createShuffledArray(int size) {
   return array;
 }
 
-void initCanvas(struct canvas *canvas, int lines, int cols) {
-  canvas->lines = lines;
-  canvas->cols = cols;
+void signalHandler(int signal) {
+  if (signal == SIGINT) {
+    show_cursor();
+    clear_window();
+    exit(0);
+  }
+}
+
+void startSort(sortParams *params) {
+  switch (params->type) {
+  case BUBBLE:
+    bubbleSort(&params);
+    break;
+  case SELECTION:
+    selectionSort(&params);
+    break;
+  case INSERTION:
+    insertionSort(&params);
+    break;
+  case DRUNK:
+    drunkSort(&params);
+    break;
+  case QUICK:
+    quickSort(&params);
+    break;
+  case MERGE:
+    mergeSort(&params);
+    break;
+  }
 }

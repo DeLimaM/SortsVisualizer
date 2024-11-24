@@ -1,14 +1,20 @@
 #include "gui.h"
 #include "terminal.h"
 #include "utils.h"
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
 
+interfaceType interface = TERMINAL;
+
 // ----------------- MAIN -----------------
 int main(int argc, char *argv[]) {
+
+  signal(SIGINT, signalHandler);
+
   sortType type = NONE;
-  interfaceType interface = TERMINAL;
-  int sleep_time = 50;
+  int sleep_time = 0;
+  int array_size = 100;
 
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "--bubble") == 0 || strcmp(argv[i], "-b") == 0) {
@@ -33,6 +39,19 @@ int main(int argc, char *argv[]) {
         printUsage();
         return 1;
       }
+    } else if (strcmp(argv[i], "--size") == 0) {
+      if (i + 1 < argc) {
+        int array_size = atoi(argv[++i]);
+        if (array_size < 1) {
+          printf("Error: size must be greater than 0\n");
+          printUsage();
+          return 1;
+        }
+      } else {
+        printf("Error: --size requires a value\n");
+        printUsage();
+        return 1;
+      }
     } else if (strcmp(argv[i], "--gui") == 0) {
       interface = GUI;
     } else {
@@ -43,11 +62,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (!(type == NONE)) {
-    if (interface == GUI) {
-      doSortInGUI(type, sleep_time);
-    } else {
-      doSortInTerminal(type, sleep_time);
-    }
+    doSortInTerminal(type, sleep_time);
   } else {
     printf("Error: no sorting algorithm specified\n");
     printUsage();
