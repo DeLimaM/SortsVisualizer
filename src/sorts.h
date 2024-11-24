@@ -1,24 +1,7 @@
 #ifndef SORTS_H
 #define SORTS_H
 
-#include "utils.h"
-
-typedef enum {
-  BUBBLE,
-  SELECTION,
-  INSERTION,
-  DRUNK,
-  QUICK,
-  MERGE,
-  NONE
-} sortType;
-typedef struct {
-  int *array;
-  int size;
-  int sleep_time;
-  sortType type;
-  int *prev_array;
-} sortParams;
+#include "sortviz.h"
 
 void bubbleSort(sortParams *sortParams);
 void selectionSort(sortParams *sortParams);

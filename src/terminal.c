@@ -24,13 +24,20 @@ void drawBar(int index, int value, const char *color) {
   }
 }
 
-void drawArray(sortParams *params) {
-  for (int i = 0; i < params->size; i++) {
-    if (params->array[i] != params->prev_array[i]) {
-      drawBar(i, params->array[i], RED);
-    }
-  }
-  memcpy(params->prev_array, params->array, params->size * sizeof(int));
+void drawArrayTerminal(sortParams *params) {
+  int *array = params->array;
+  int size = params->size;
+
+  // draw the swapped bars
+  drawBar(params->swap_params.index1, array[params->swap_params.index1], RED);
+  drawBar(params->swap_params.index2, array[params->swap_params.index2], RED);
+
+  // draw the previous swapped bars
+  drawBar(params->swap_params.prev_index1,
+          array[params->swap_params.prev_index1], WHITE);
+  drawBar(params->swap_params.prev_index2,
+          array[params->swap_params.prev_index2], WHITE);
+
   sleep(params->sleep_time);
 }
 
@@ -46,14 +53,12 @@ void doSortInTerminal(sortType type, int sleep_time) {
   int array_size = cols;
   int max_value = lines - TOP_MARGIN;
   int *array = createShuffledArray(array_size);
-  int *prev_array = malloc(array_size * sizeof(int));
 
   sortParams params;
   params.array = array;
   params.size = array_size;
   params.sleep_time = sleep_time;
   params.type = type;
-  params.prev_array = prev_array;
 
   clear_window();
   hide_cursor();

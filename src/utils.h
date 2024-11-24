@@ -1,7 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "sorts.h"
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -24,11 +23,8 @@
     *b = tmp;                                                                  \
   }
 
-typedef enum { TERMINAL, GUI } interfaceType;
-
 int *createShuffledArray(int size);
 void printUsage();
 void signalHandler(int signal);
-void startSort(sortParams *params);
 
 #endif // UTILS_H

@@ -1,11 +1,8 @@
-#include "gui.h"
-#include "terminal.h"
+#include "sortviz.h"
 #include "utils.h"
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-
-interfaceType interface = TERMINAL;
 
 // ----------------- MAIN -----------------
 int main(int argc, char *argv[]) {
@@ -53,7 +50,7 @@ int main(int argc, char *argv[]) {
         return 1;
       }
     } else if (strcmp(argv[i], "--gui") == 0) {
-      interface = GUI;
+      setInterface(GUI);
     } else {
       printf("Unexpected argument: %s\n", argv[i]);
       printUsage();
@@ -62,7 +59,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (!(type == NONE)) {
-    doSortInTerminal(type, sleep_time);
+    doSort(type, sleep_time);
   } else {
     printf("Error: no sorting algorithm specified\n");
     printUsage();

@@ -44,26 +44,3 @@ void signalHandler(int signal) {
     exit(0);
   }
 }
-
-void startSort(sortParams *params) {
-  switch (params->type) {
-  case BUBBLE:
-    bubbleSort(&params);
-    break;
-  case SELECTION:
-    selectionSort(&params);
-    break;
-  case INSERTION:
-    insertionSort(&params);
-    break;
-  case DRUNK:
-    drunkSort(&params);
-    break;
-  case QUICK:
-    quickSort(&params);
-    break;
-  case MERGE:
-    mergeSort(&params);
-    break;
-  }
-}

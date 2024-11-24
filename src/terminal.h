@@ -11,6 +11,6 @@
 #define TOP_MARGIN 2
 
 void doSortInTerminal(sortType type, int sleep_time);
-void drawArray(sortParams *params);
+void drawArrayTerminal(sortParams *params);
 
 #endif // TERMINAL_H
