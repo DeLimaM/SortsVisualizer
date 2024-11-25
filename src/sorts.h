@@ -3,11 +3,11 @@
 
 #include "sortviz.h"
 
-void bubbleSort(sortParams *sortParams);
-void selectionSort(sortParams *sortParams);
-void insertionSort(sortParams *sortParams);
-void drunkSort(sortParams *sortParams);
-void quickSort(sortParams *sortParams);
-void mergeSort(sortParams *sortParams);
+void bubbleSort(sortParams *params);
+void selectionSort(sortParams *params);
+void insertionSort(sortParams *params);
+void bogoSort(sortParams *params);
+void quickSort(sortParams *params);
+void mergeSort(sortParams *params);
 
 #endif // SORTS_H

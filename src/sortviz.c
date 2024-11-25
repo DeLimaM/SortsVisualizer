@@ -7,12 +7,17 @@ interfaceType interface = TERMINAL;
 
 void setInterface(interfaceType type) { interface = type; }
 
-void setIndex1(swapParams *params, int new_index1) {
+void setInsertIndex(insertParams *params, int new_index) {
+  params->prev_index = params->index;
+  params->index = new_index;
+}
+
+void setSwapIndex1(swapParams *params, int new_index1) {
   params->prev_index1 = params->index1;
   params->index1 = new_index1;
 }
 
-void setIndex2(swapParams *params, int new_index2) {
+void setSwapIndex2(swapParams *params, int new_index2) {
   params->prev_index2 = params->index2;
   params->index2 = new_index2;
 }
@@ -27,9 +32,6 @@ void startSort(sortParams *params) {
     break;
   case INSERTION:
     insertionSort(params);
-    break;
-  case DRUNK:
-    drunkSort(params);
     break;
   case QUICK:
     quickSort(params);

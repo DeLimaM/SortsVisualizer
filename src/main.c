@@ -16,7 +16,6 @@ void printUsage() {
   printf("    --bubble, -b\n");
   printf("    --selection, -s\n");
   printf("    --insertion, -i\n");
-  printf("    --drunk, -d\n");
   printf("    --quick, -q\n");
   printf("    --merge, -m\n");
   printf("    --stime <value>\n");
@@ -29,7 +28,7 @@ int main(int argc, char *argv[]) {
   signal(SIGINT, signalHandler);
 
   sortType type = NONE;
-  int sleep_time = 0;
+  int sleep_time = 10;
   int array_size = 100;
 
   for (int i = 1; i < argc; i++) {
@@ -41,8 +40,6 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(argv[i], "--insertion") == 0 ||
                strcmp(argv[i], "-i") == 0) {
       type = INSERTION;
-    } else if (strcmp(argv[i], "--drunk") == 0 || strcmp(argv[i], "-d") == 0) {
-      type = DRUNK;
     } else if (strcmp(argv[i], "--quick") == 0 || strcmp(argv[i], "-q") == 0) {
       type = QUICK;
     } else if (strcmp(argv[i], "--merge") == 0 || strcmp(argv[i], "-m") == 0) {

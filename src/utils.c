@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -18,4 +19,13 @@ int *createShuffledArray(int size) {
   }
   shuffle(array, size);
   return array;
+}
+
+bool isSorted(int *array, int size) {
+  for (int i = 0; i < size - 1; i++) {
+    if (array[i] > array[i + 1]) {
+      return false;
+    }
+  }
+  return true;
 }

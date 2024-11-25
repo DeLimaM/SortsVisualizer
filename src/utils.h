@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -19,6 +20,8 @@
     *b = tmp;                                                                  \
   }
 
+void shuffle(int *array, int size);
 int *createShuffledArray(int size);
+bool isSorted(int *array, int size);
 
 #endif // UTILS_H

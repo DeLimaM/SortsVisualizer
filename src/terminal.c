@@ -32,21 +32,45 @@ void drawBar(int index, int value, const char *color) {
   }
 }
 
+void drawFullArray(sortParams *params) {
+  int *array = params->array;
+  int size = params->size;
+
+  for (int i = 0; i < size; i++) {
+    drawBar(i, array[i], WHITE);
+  }
+}
+
 void drawArrayTerminal(sortParams *params) {
   int *array = params->array;
   int size = params->size;
 
-  // draw the previous swapped bars
-  drawBar(params->swap_params.prev_index1,
-          array[params->swap_params.prev_index1], WHITE);
-  drawBar(params->swap_params.prev_index2,
-          array[params->swap_params.prev_index2], WHITE);
+  int swap_index1 = params->swap_params.index1;
+  int swap_index2 = params->swap_params.index2;
+  int prev_swap_index1 = params->swap_params.prev_index1;
+  int prev_swap_index2 = params->swap_params.prev_index2;
+  int insert_index = params->insert_params.index;
+  int prev_insert_index = params->insert_params.prev_index;
+
+  // draw the previous selected bars
+  if (prev_swap_index1 != -1 && prev_swap_index2 != -1) {
+    drawBar(prev_swap_index1, array[prev_swap_index1], WHITE);
+    drawBar(prev_swap_index2, array[prev_swap_index2], WHITE);
+  }
+  if (prev_insert_index != -1) {
+    drawBar(prev_insert_index, array[prev_insert_index], WHITE);
+  }
 
   sleep(params->sleep_time);
 
-  // draw the swapped bars
-  drawBar(params->swap_params.index1, array[params->swap_params.index1], RED);
-  drawBar(params->swap_params.index2, array[params->swap_params.index2], RED);
+  // draw the current selected bars
+  if (swap_index1 != -1 && swap_index2 != -1) {
+    drawBar(swap_index1, array[swap_index1], RED);
+    drawBar(swap_index2, array[swap_index2], RED);
+  }
+  if (insert_index != -1) {
+    drawBar(insert_index, array[insert_index], GREEN);
+  }
 }
 
 // ----------------- SORTING -----------------
@@ -69,11 +93,19 @@ void doSortInTerminal(sortType type, int sleep_time) {
   params.size = array_size;
   params.sleep_time = sleep_time;
   params.type = type;
+  params.swap_params.index1 = -1;
+  params.swap_params.index2 = -1;
+  params.swap_params.prev_index1 = -1;
+  params.swap_params.prev_index2 = -1;
+  params.insert_params.index = -1;
+  params.insert_params.prev_index = -1;
 
   clear_window();
   hide_cursor();
 
+  drawFullArray(&params);
   startSort(&params);
+  drawFullArray(&params);
 
   gotoxy(0, lines);
   printf("\n");
