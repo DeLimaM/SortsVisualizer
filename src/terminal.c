@@ -1,13 +1,21 @@
 #include "terminal.h"
 #include "utils.h"
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-// ----------------- DRAWING -----------------
+// ----------------- SIGNAL HANDLER -----------------
+void signalHandlerTerminal(int signal) {
+  if (signal == SIGINT) {
+    clear_window();
+    show_cursor();
+    exit(0);
+  }
+}
 
+// ----------------- DRAWING -----------------
 int lines;
 int cols;
 
@@ -28,10 +36,6 @@ void drawArrayTerminal(sortParams *params) {
   int *array = params->array;
   int size = params->size;
 
-  // draw the swapped bars
-  drawBar(params->swap_params.index1, array[params->swap_params.index1], RED);
-  drawBar(params->swap_params.index2, array[params->swap_params.index2], RED);
-
   // draw the previous swapped bars
   drawBar(params->swap_params.prev_index1,
           array[params->swap_params.prev_index1], WHITE);
@@ -39,9 +43,15 @@ void drawArrayTerminal(sortParams *params) {
           array[params->swap_params.prev_index2], WHITE);
 
   sleep(params->sleep_time);
+
+  // draw the swapped bars
+  drawBar(params->swap_params.index1, array[params->swap_params.index1], RED);
+  drawBar(params->swap_params.index2, array[params->swap_params.index2], RED);
 }
 
+// ----------------- SORTING -----------------
 void doSortInTerminal(sortType type, int sleep_time) {
+  signal(SIGINT, signalHandlerTerminal);
 
   interfaceType interface = TERMINAL;
 

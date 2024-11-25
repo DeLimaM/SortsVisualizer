@@ -4,6 +4,25 @@
 #include <stdio.h>
 #include <string.h>
 
+void signalHandler(int signal) {
+  if (signal == SIGINT) {
+    exit(0);
+  }
+}
+
+void printUsage() {
+  printf("  Usage: sortviz [OPTIONS]\n");
+  printf("  Options:\n");
+  printf("    --bubble, -b\n");
+  printf("    --selection, -s\n");
+  printf("    --insertion, -i\n");
+  printf("    --drunk, -d\n");
+  printf("    --quick, -q\n");
+  printf("    --merge, -m\n");
+  printf("    --stime <value>\n");
+  printf("  Example: sortviz --bubble --stime 50\n");
+}
+
 // ----------------- MAIN -----------------
 int main(int argc, char *argv[]) {
 
