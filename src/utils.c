@@ -15,17 +15,8 @@ void shuffle(int *array, int size) {
 int *createShuffledArray(int size) {
   int *array = malloc(size * sizeof(int));
   for (int i = 0; i < size; i++) {
-    array[i] = i;
+    array[i] = i + 1;
   }
   shuffle(array, size);
   return array;
-}
-
-bool isSorted(int *array, int size) {
-  for (int i = 0; i < size - 1; i++) {
-    if (array[i] > array[i + 1]) {
-      return false;
-    }
-  }
-  return true;
 }

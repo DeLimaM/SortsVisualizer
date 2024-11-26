@@ -13,7 +13,9 @@ void bubbleSort(sortParams *params) {
         setSwapIndex1(&params->swap_params, j);
         setSwapIndex2(&params->swap_params, j + 1);
         drawArray(params);
+        params->swaps++;
       }
+      params->comparisons++;
     }
   }
 }

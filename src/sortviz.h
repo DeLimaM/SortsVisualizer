@@ -20,6 +20,9 @@ typedef struct {
   sortType type;
   swapParams swap_params;
   insertParams insert_params;
+  int swaps;
+  int inserts;
+  int comparisons;
 } sortParams;
 
 void startSort(sortParams *params);

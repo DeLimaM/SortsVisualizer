@@ -22,6 +22,5 @@
 
 void shuffle(int *array, int size);
 int *createShuffledArray(int size);
-bool isSorted(int *array, int size);
 
 #endif // UTILS_H

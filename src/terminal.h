@@ -9,6 +9,7 @@
 #define GREEN "\x1b[32m"
 #define RESET "\x1b[0m"
 #define TOP_MARGIN 2
+#define COUNTERS_MARGIN 1
 
 #define gotoxy(x, y) printf("\033[%d;%dH", (y), (x))
 #define clear_window() printf("\033[H\033[J")
