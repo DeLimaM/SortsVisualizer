@@ -7,6 +7,6 @@
 #define WINDOW_DEFAULT_WIDTH 800
 #define WINDOW_DEFAULT_HEIGHT 600
 
-void doSortInGUI(sortType type, int sleep_time);
+void doSortInGUI(SortType type, int sleep_time);
 
 #endif // GUI_H

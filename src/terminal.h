@@ -15,6 +15,6 @@
 #define hide_cursor() printf("\e[?25l")
 #define show_cursor() printf("\e[?25h")
 
-void doSortInTerminal(sortType type, int sleep_time);
+void doSortInTerminal(SortType type, int sleep_time);
 
 #endif // TERMINAL_H

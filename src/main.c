@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 
   signal(SIGINT, signalHandler);
 
-  sortType type = NONE;
+  SortType type = NONE;
   int sleep_time = 10;
   int array_size = 100;
 

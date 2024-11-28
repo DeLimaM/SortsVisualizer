@@ -3,26 +3,26 @@
 #include "sorts.h"
 #include "terminal.h"
 
-interfaceType interface = TERMINAL;
+InterfaceType interface = TERMINAL;
 
-void setInterface(interfaceType type) { interface = type; }
+void setInterface(InterfaceType type) { interface = type; }
 
-void setInsertIndex(insertParams *params, int new_index) {
+void setInsertIndex(InsertParams *params, int new_index) {
   params->prev_index = params->index;
   params->index = new_index;
 }
 
-void setSwapIndex1(swapParams *params, int new_index1) {
+void setSwapIndex1(SwapParams *params, int new_index1) {
   params->prev_index1 = params->index1;
   params->index1 = new_index1;
 }
 
-void setSwapIndex2(swapParams *params, int new_index2) {
+void setSwapIndex2(SwapParams *params, int new_index2) {
   params->prev_index2 = params->index2;
   params->index2 = new_index2;
 }
 
-void doSort(sortType type, int sleep_time) {
+void doSort(SortType type, int sleep_time) {
   switch (interface) {
   case TERMINAL:
     doSortInTerminal(type, sleep_time);

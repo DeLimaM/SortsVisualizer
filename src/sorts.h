@@ -3,8 +3,8 @@
 
 #include "sortviz.h"
 
-void bubbleSortStep(sortParams *params);
-void selectionSortStep(sortParams *params);
-void insertionSortStep(sortParams *params);
+void bubbleSortStep(BubbleSortParams *params);
+void selectionSortStep(SelectionSortParams *params);
+void insertionSortStep(InsertionSortParams *params);
 
 #endif // SORTS_H

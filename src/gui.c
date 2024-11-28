@@ -4,7 +4,7 @@
 #include "sortviz.h"
 #include "utils.h"
 
-void doSortInGUI(sortType type, int sleep_time) {
+void doSortInGUI(SortType type, int sleep_time) {
   InitWindow(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, WINDOW_TITLE);
   SetWindowState(FLAG_WINDOW_RESIZABLE);
   MaximizeWindow();
