@@ -4,5 +4,7 @@
 #include "sortviz.h"
 
 void bubbleSortStep(sortParams *params);
+void selectionSortStep(sortParams *params);
+void insertionSortStep(sortParams *params);
 
 #endif // SORTS_H

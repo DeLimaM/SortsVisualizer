@@ -20,7 +20,6 @@ Additional options such as **clean**, **rebuild** and **reinstall** are also ava
     --bubble, -b
     --selection, -s
     --insertion, -i
-    --drunk, -d
     --quick, -q
     --merge, -m
     --stime <value>

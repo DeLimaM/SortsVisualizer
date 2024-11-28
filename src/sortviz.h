@@ -32,6 +32,8 @@ typedef struct {
   SortState state;
   int i;
   int j;
+  int index_min;
+  int key;
 } sortParams;
 
 void setInterface(interfaceType type);

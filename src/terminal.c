@@ -112,6 +112,8 @@ void doSortInTerminal(sortType type, int sleep_time) {
   params.state = SORT_STATE_IDLE;
   params.i = 0;
   params.j = 0;
+  params.index_min = 0;
+  params.key = 0;
 
   clear_window();
   hide_cursor();
@@ -121,6 +123,12 @@ void doSortInTerminal(sortType type, int sleep_time) {
     switch (params.type) {
     case BUBBLE:
       bubbleSortStep(&params);
+      break;
+    case SELECTION:
+      selectionSortStep(&params);
+      break;
+    case INSERTION:
+      insertionSortStep(&params);
       break;
     default:
       break;
