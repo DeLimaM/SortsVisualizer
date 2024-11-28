@@ -19,87 +19,69 @@ void signalHandlerTerminal(int signal) {
 int lines;
 int cols;
 
-int bar_width;
-int bar_margin;
-
-void initBarDimensions(int size) {
-  int combined_width_margin = cols / size;
-  bar_width = combined_width_margin / 1.5;
-  bar_margin = combined_width_margin - bar_width;
-}
-
-void drawCountersTerminal(sortParams *params) {
-  gotoxy(COUNTERS_MARGIN, COUNTERS_MARGIN);
-  printf("Comparisons: %d, Swaps: %d, Inserts: %d", params->comparisons,
-         params->swaps, params->inserts);
-}
-
 void drawBar(int index, int value, const char *color) {
   int max_bar_height = lines - TOP_MARGIN;
-  int bar_height = value;
-
-  // Print the margin spaces before the bar
-  for (int x = 0; x < bar_margin; x++) {
-    for (int y = 0; y < max_bar_height; y++) {
-      gotoxy(index + x, max_bar_height - y);
+  int bar_height = (value * max_bar_height) / cols;
+  for (int i = 0; i < max_bar_height; i++) {
+    gotoxy(index, max_bar_height - i + TOP_MARGIN);
+    if (i < bar_height) {
+      printf("%s█%s", color, RESET);
+    } else {
       printf(" ");
-    }
-  }
-
-  // Print the bar
-  for (int x = 0; x < bar_width; x++) {
-    for (int y = 0; y < max_bar_height; y++) {
-      gotoxy(index * (bar_width + bar_margin) + bar_margin + x,
-             max_bar_height - y);
-      if (y < bar_height) {
-        printf("%s█%s", color, RESET);
-      } else {
-        printf(" ");
-      }
     }
   }
 }
 
 void drawFullArray(sortParams *params) {
-  for (int i = 0; i < params->size; i++) {
-    drawBar(i, params->array[i], WHITE);
-  }
-
-  drawCountersTerminal(params);
-}
-
-void drawArrayTerminal(sortParams *params) {
   int *array = params->array;
   int size = params->size;
 
-  int swap_index1 = params->swap_params.index1;
-  int swap_index2 = params->swap_params.index2;
-  int prev_swap_index1 = params->swap_params.prev_index1;
-  int prev_swap_index2 = params->swap_params.prev_index2;
-  int insert_index = params->insert_params.index;
-  int prev_insert_index = params->insert_params.prev_index;
-
-  // draw the previous selected bars
-  if (prev_swap_index1 != -1 && prev_swap_index2 != -1) {
-    drawBar(prev_swap_index1, array[prev_swap_index1], WHITE);
-    drawBar(prev_swap_index2, array[prev_swap_index2], WHITE);
+  for (int i = 0; i < size; i++) {
+    drawBar(i, array[i], WHITE);
   }
-  if (prev_insert_index != -1) {
-    drawBar(prev_insert_index, array[prev_insert_index], WHITE);
-  }
+}
 
-  sleep(params->sleep_time);
+void drawIndicators(sortParams *params) {
+  gotoxy(0, 1);
+  printf("State: %s  Size: %d  Comparisons: %d  %sSwaps: %d%s  %sInserts: %d%s",
+         params->state == SORT_STATE_RUNNING    ? "RUNNING"
+         : params->state == SORT_STATE_FINISHED ? "FINISHED"
+         : params->state == SORT_STATE_PAUSED   ? "PAUSED"
+                                                : "IDLE",
+         params->size, params->comparisons, RED, params->swaps, RESET, GREEN,
+         params->inserts, RESET);
+}
 
-  // draw the current selected bars
-  if (swap_index1 != -1 && swap_index2 != -1) {
-    drawBar(swap_index1, array[swap_index1], RED);
-    drawBar(swap_index2, array[swap_index2], RED);
-  }
-  if (insert_index != -1) {
-    drawBar(insert_index, array[insert_index], GREEN);
-  }
+void updateArrayTerminal(sortParams *params) {
+  int *array = params->array;
 
-  drawCountersTerminal(params);
+  drawIndicators(params);
+
+  // redraw the swapped bars
+  if (params->swap_params.prev_index1 >= 0)
+    drawBar(params->swap_params.prev_index1,
+            array[params->swap_params.prev_index1], WHITE);
+
+  if (params->swap_params.prev_index2 >= 0)
+    drawBar(params->swap_params.prev_index2,
+            array[params->swap_params.prev_index2], WHITE);
+
+  if (params->swap_params.index1 >= 0)
+    drawBar(params->swap_params.index1, array[params->swap_params.index1], RED);
+
+  if (params->swap_params.index2 >= 0)
+    drawBar(params->swap_params.index2, array[params->swap_params.index2], RED);
+
+  // redraw the inserted bar
+  if (params->insert_params.prev_index >= 0)
+    drawBar(params->insert_params.prev_index,
+            array[params->insert_params.prev_index], WHITE);
+
+  if (params->insert_params.index >= 0)
+    drawBar(params->insert_params.index, array[params->insert_params.index],
+            GREEN);
+
+  fflush(stdout);
 }
 
 // ----------------- SORTING -----------------
@@ -113,13 +95,9 @@ void doSortInTerminal(sortType type, int sleep_time) {
   lines = w.ws_row;
   cols = w.ws_col;
 
-  int size = lines;
-  initBarDimensions(size);
-  int *array = createShuffledArray(size);
-
   sortParams params;
-  params.array = array;
-  params.size = size;
+  params.array = createShuffledArray(cols);
+  params.size = cols;
   params.sleep_time = sleep_time;
   params.type = type;
   params.swap_params.index1 = -1;
@@ -128,17 +106,31 @@ void doSortInTerminal(sortType type, int sleep_time) {
   params.swap_params.prev_index2 = -1;
   params.insert_params.index = -1;
   params.insert_params.prev_index = -1;
-  params.comparisons = 0;
   params.swaps = 0;
   params.inserts = 0;
+  params.comparisons = 0;
+  params.state = SORT_STATE_IDLE;
+  params.i = 0;
+  params.j = 0;
 
-  hide_cursor();
   clear_window();
-
-  drawFullArray(&params);
-  startSort(&params);
+  hide_cursor();
   drawFullArray(&params);
 
+  while (params.state != SORT_STATE_FINISHED) {
+    switch (params.type) {
+    case BUBBLE:
+      bubbleSortStep(&params);
+      break;
+    default:
+      break;
+    }
+
+    updateArrayTerminal(&params);
+    sleep(params.sleep_time);
+  }
+
+  drawFullArray(&params);
   gotoxy(0, lines);
   printf("\n");
   show_cursor();

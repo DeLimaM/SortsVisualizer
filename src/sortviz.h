@@ -3,6 +3,12 @@
 
 typedef enum { TERMINAL, GUI } interfaceType;
 typedef enum { BUBBLE, SELECTION, INSERTION, QUICK, MERGE, NONE } sortType;
+typedef enum {
+  SORT_STATE_IDLE,
+  SORT_STATE_RUNNING,
+  SORT_STATE_PAUSED,
+  SORT_STATE_FINISHED
+} SortState;
 typedef struct {
   int index1;
   int index2;
@@ -23,13 +29,13 @@ typedef struct {
   int swaps;
   int inserts;
   int comparisons;
+  SortState state;
+  int i;
+  int j;
 } sortParams;
 
-void startSort(sortParams *params);
 void setInterface(interfaceType type);
-void drawArray(sortParams *params);
 void doSort(sortType type, int sleep_time);
-
 void setSwapIndex1(swapParams *params, int new_index1);
 void setSwapIndex2(swapParams *params, int new_index2);
 void setInsertIndex(insertParams *params, int new_index);

@@ -20,7 +20,6 @@
     *b = tmp;                                                                  \
   }
 
-void shuffle(int *array, int size);
 int *createShuffledArray(int size);
 
 #endif // UTILS_H
