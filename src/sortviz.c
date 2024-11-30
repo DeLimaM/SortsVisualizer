@@ -5,6 +5,26 @@
 
 InterfaceType interface = TERMINAL;
 
+void initBaseParams(BaseSortParams *params, int size, int sleep_time,
+                    SortType type) {
+  params->array = createShuffledArray(size);
+  params->size = size;
+  params->sleep_time = sleep_time;
+  params->type = type;
+  params->state = SORT_STATE_IDLE;
+  params->swaps = 0;
+  params->inserts = 0;
+  params->comparisons = 0;
+
+  params->swap_params.index1 = -1;
+  params->swap_params.index2 = -1;
+  params->swap_params.prev_index1 = -1;
+  params->swap_params.prev_index2 = -1;
+
+  params->insert_params.index = -1;
+  params->insert_params.prev_index = -1;
+}
+
 void shuffle(int *array, int size) {
   srand(time(NULL));
   for (int i = size - 1; i > 0; i--) {

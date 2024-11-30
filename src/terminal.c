@@ -16,7 +16,7 @@ void signalHandlerTerminal(int signal) {
 int lines;
 int cols;
 
-void drawBar(int index, int value, const char *color) {
+void drawBarTerminal(int index, int value, const char *color) {
   int max_bar_height = lines - TOP_MARGIN;
   int bar_height = (value * max_bar_height) / cols;
   for (int i = 0; i < max_bar_height; i++) {
@@ -29,15 +29,15 @@ void drawBar(int index, int value, const char *color) {
   }
 }
 
-void drawFullArray(SortParamsUnion *params) {
+void drawFullArrayTerminal(SortParamsUnion *params) {
   int *array = params->base.array;
   int size = params->base.size;
   for (int i = 0; i < size; i++) {
-    drawBar(i, array[i], WHITE);
+    drawBarTerminal(i, array[i], WHITE);
   }
 }
 
-void drawIndicators(SortParamsUnion *params) {
+void drawIndicatorsTerminal(SortParamsUnion *params) {
   gotoxy(0, 1);
   printf("State: %s  Size: %d  Comparisons: %d  %sSwaps: %d%s  %sInserts: %d%s",
          params->base.state == SORT_STATE_RUNNING    ? "RUNNING"
@@ -51,33 +51,33 @@ void drawIndicators(SortParamsUnion *params) {
 void updateArrayTerminal(SortParamsUnion *params) {
   int *array = params->base.array;
 
-  drawIndicators(params);
+  drawIndicatorsTerminal(params);
 
   // redraw the swapped bars
   if (params->base.swap_params.prev_index1 >= 0)
-    drawBar(params->base.swap_params.prev_index1,
-            array[params->base.swap_params.prev_index1], WHITE);
+    drawBarTerminal(params->base.swap_params.prev_index1,
+                    array[params->base.swap_params.prev_index1], WHITE);
 
   if (params->base.swap_params.prev_index2 >= 0)
-    drawBar(params->base.swap_params.prev_index2,
-            array[params->base.swap_params.prev_index2], WHITE);
+    drawBarTerminal(params->base.swap_params.prev_index2,
+                    array[params->base.swap_params.prev_index2], WHITE);
 
   if (params->base.swap_params.index1 >= 0)
-    drawBar(params->base.swap_params.index1,
-            array[params->base.swap_params.index1], RED);
+    drawBarTerminal(params->base.swap_params.index1,
+                    array[params->base.swap_params.index1], RED);
 
   if (params->base.swap_params.index2 >= 0)
-    drawBar(params->base.swap_params.index2,
-            array[params->base.swap_params.index2], RED);
+    drawBarTerminal(params->base.swap_params.index2,
+                    array[params->base.swap_params.index2], RED);
 
   // redraw the inserted bar
   if (params->base.insert_params.prev_index >= 0)
-    drawBar(params->base.insert_params.prev_index,
-            array[params->base.insert_params.prev_index], WHITE);
+    drawBarTerminal(params->base.insert_params.prev_index,
+                    array[params->base.insert_params.prev_index], WHITE);
 
   if (params->base.insert_params.index >= 0)
-    drawBar(params->base.insert_params.index,
-            array[params->base.insert_params.index], GREEN);
+    drawBarTerminal(params->base.insert_params.index,
+                    array[params->base.insert_params.index], GREEN);
 
   fflush(stdout);
 }
@@ -91,26 +91,11 @@ void doSortInTerminal(SortType type, int sleep_time) {
   cols = w.ws_col;
 
   SortParamsUnion params;
-  params.base.array = createShuffledArray(cols);
-  params.base.size = cols;
-  params.base.sleep_time = sleep_time;
-  params.base.type = type;
-  params.base.state = SORT_STATE_IDLE;
-  params.base.swaps = 0;
-  params.base.inserts = 0;
-  params.base.comparisons = 0;
-
-  params.base.swap_params.index1 = -1;
-  params.base.swap_params.index2 = -1;
-  params.base.swap_params.prev_index1 = -1;
-  params.base.swap_params.prev_index2 = -1;
-
-  params.base.insert_params.index = -1;
-  params.base.insert_params.prev_index = -1;
+  initBaseParams(&params.base, cols, sleep_time, type);
 
   clear_window();
   hide_cursor();
-  drawFullArray(&params);
+  drawFullArrayTerminal(&params);
 
   while (params.base.state != SORT_STATE_FINISHED) {
     switch (params.base.type) {
@@ -137,7 +122,7 @@ void doSortInTerminal(SortType type, int sleep_time) {
     sleep(params.base.sleep_time);
   }
 
-  drawFullArray(&params);
+  drawFullArrayTerminal(&params);
   gotoxy(0, lines);
   printf("\n");
   show_cursor();

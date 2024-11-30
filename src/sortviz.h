@@ -6,6 +6,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#define RESET "\x1b[0m"
+
 #define MAX_STACK_SIZE 32
 
 #define sleep(ms) usleep(ms * 1000)
@@ -121,6 +123,8 @@ typedef union {
   QuickSortParams quick;
 } SortParamsUnion;
 
+void initBaseParams(BaseSortParams *params, int size, int sleep_time,
+                    SortType type);
 int *createShuffledArray(int size);
 void setInterface(InterfaceType type);
 void doSort(SortType type, int sleep_time);
