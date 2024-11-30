@@ -109,14 +109,6 @@ void doSortInTerminal(SortType type, int sleep_time) {
   params.base.insert_params.index = -1;
   params.base.insert_params.prev_index = -1;
 
-  if (type == MERGE) {
-    params.merge.i = 0;
-    params.merge.j = 0;
-    params.merge.k = 0;
-    params.merge.curr_size = 1;
-    params.merge.merge_step = 0;
-  }
-
   clear_window();
   hide_cursor();
   drawFullArray(&params);

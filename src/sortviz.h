@@ -1,6 +1,8 @@
 #ifndef SORTVIZ_H
 #define SORTVIZ_H
 
+#define MAX_STACK_SIZE 1000
+
 typedef enum { TERMINAL, GUI } InterfaceType;
 typedef enum { BUBBLE, SELECTION, INSERTION, QUICK, MERGE, NONE } SortType;
 typedef enum {
@@ -56,16 +58,20 @@ typedef struct {
 } InsertionSortParams;
 
 typedef struct {
-  BaseSortParams base;
-  int *temp_array;
   int left;
-  int right;
   int mid;
-  int i;
-  int j;
-  int k;
-  int curr_size;
-  int merge_step;
+  int right;
+  int step; // 0=initial, 1=left half, 2=right half, 3=merge
+} MergeState;
+
+typedef struct {
+  BaseSortParams base;
+  MergeState stack[MAX_STACK_SIZE];
+  int stackSize;
+  int *tempArray;
+  int mergeIndex;
+  int leftIndex;
+  int rightIndex;
 } MergeSortParams;
 
 typedef union {
