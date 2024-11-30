@@ -126,8 +126,8 @@ typedef union {
 void initBaseParams(BaseSortParams *params, int size, int sleep_time,
                     SortType type);
 int *createShuffledArray(int size);
-void setInterface(InterfaceType type);
-void doSort(SortType type, int sleep_time);
+void doSort(SortType type, InterfaceType interface, int sleep_time,
+            int array_size);
 void setSwapIndex(SwapParams *params, int new_index1, int new_index2);
 void setInsertIndex(InsertParams *params, int new_index);
 

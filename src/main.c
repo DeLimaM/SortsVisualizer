@@ -27,8 +27,8 @@ int main(int argc, char *argv[]) {
   signal(SIGINT, signalHandler);
 
   SortType type = NONE;
+  InterfaceType interface = TERMINAL;
   int sleep_time = 5;
-
   int array_size = 100;
 
   for (int i = 1; i < argc; i++) {
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
       }
     } else if (strcmp(argv[i], "--size") == 0) {
       if (i + 1 < argc) {
-        int array_size = atoi(argv[++i]);
+        array_size = atoi(argv[++i]);
         if (array_size < 1) {
           printf("Error: size must be greater than 0\n");
           printUsage();
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
         return 1;
       }
     } else if (strcmp(argv[i], "--gui") == 0) {
-      setInterface(GUI);
+      interface = GUI;
     } else {
       printf("Unexpected argument: %s\n", argv[i]);
       printUsage();
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (!(type == NONE)) {
-    doSort(type, sleep_time);
+    doSort(type, interface, sleep_time, array_size);
   } else {
     printf("Error: no sorting algorithm specified\n");
     printUsage();

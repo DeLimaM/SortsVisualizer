@@ -9,10 +9,12 @@
 
 #define INDICATORS_ZONE_HEIGHT 50
 #define INDICATORS_FONT_SIZE 10
+#define INDICATORS_WIDTH 125
+#define INDICATORS_MARGIN 10
 
 #define BACKGROUND_COLOR DARKGRAY
 #define BAR_COLOR WHITE
 
-void doSortInGUI(SortType type, int sleep_time);
+void doSortInGUI(SortType type, int sleep_time, int array_size);
 
 #endif // GUI_H
