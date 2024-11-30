@@ -61,7 +61,7 @@ typedef struct {
   int left;
   int mid;
   int right;
-  int step; // 0=initial, 1=left half, 2=right half, 3=merge
+  enum { INITIAL_SPLIT, LEFT_HALF, RIGHT_HALF, MERGE_STEP } step;
 } MergeState;
 
 typedef struct {
@@ -74,12 +74,35 @@ typedef struct {
   int rightIndex;
 } MergeSortParams;
 
+typedef enum {
+  PARTITION_START,
+  PARTITION_PROCESS,
+  HANDLE_LEFT,
+  HANDLE_RIGHT
+} QuickSortStep;
+
+typedef struct {
+  int left;
+  int right;
+  int pivotIndex;
+  int i; // Current scanning index
+  int j; // Final pivot position
+  QuickSortStep step;
+} QuickState;
+
+typedef struct {
+  BaseSortParams base;
+  QuickState stack[MAX_STACK_SIZE];
+  int stackSize;
+} QuickSortParams;
+
 typedef union {
   BaseSortParams base;
   BubbleSortParams bubble;
   SelectionSortParams selection;
   InsertionSortParams insertion;
   MergeSortParams merge;
+  QuickSortParams quick;
 } SortParamsUnion;
 
 void setInterface(InterfaceType type);

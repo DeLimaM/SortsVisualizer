@@ -127,6 +127,9 @@ void doSortInTerminal(SortType type, int sleep_time) {
     case MERGE:
       mergeSortStep(&params.merge);
       break;
+    case QUICK:
+      quickSortStep(&params.quick);
+      break;
     default:
       break;
     }

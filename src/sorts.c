@@ -106,7 +106,7 @@ void mergeSortStep(MergeSortParams *params) {
   if (params->base.state == SORT_STATE_FINISHED)
     return;
 
-  // Initialize if starting
+  // initialize if starting
   if (params->base.state == SORT_STATE_IDLE) {
     params->stackSize = 1;
     params->stack[0] = (MergeState){0, 0, params->base.size - 1, 0};
@@ -114,7 +114,7 @@ void mergeSortStep(MergeSortParams *params) {
     params->base.state = SORT_STATE_RUNNING;
   }
 
-  // Process current state
+  // process current state
   while (params->stackSize > 0) {
     MergeState *current = &params->stack[params->stackSize - 1];
 
@@ -124,21 +124,21 @@ void mergeSortStep(MergeSortParams *params) {
     }
 
     switch (current->step) {
-    case 0: // Initial split
+    case INITIAL_SPLIT:
       current->mid = (current->left + current->right) / 2;
-      current->step = 1;
+      current->step = LEFT_HALF;
       params->stack[params->stackSize++] =
           (MergeState){current->left, 0, current->mid, 0};
       return;
 
-    case 1: // Process right half
-      current->step = 2;
+    case LEFT_HALF:
+      current->step = RIGHT_HALF;
       params->stack[params->stackSize++] =
           (MergeState){current->mid + 1, 0, current->right, 0};
       return;
 
-    case 2: // Start merging
-      current->step = 3;
+    case RIGHT_HALF:
+      current->step = MERGE_STEP;
       params->mergeIndex = current->left;
       params->leftIndex = current->left;
       params->rightIndex = current->mid + 1;
@@ -147,7 +147,7 @@ void mergeSortStep(MergeSortParams *params) {
              (current->right - current->left + 1) * sizeof(int));
       return;
 
-    case 3: // Merge step by step
+    case MERGE_STEP:
       if (params->mergeIndex <= current->right) {
         bool takeLeft = params->rightIndex > current->right ||
                         (params->leftIndex <= current->mid &&
@@ -172,6 +172,94 @@ void mergeSortStep(MergeSortParams *params) {
       if (params->stackSize == 0) {
         params->base.state = SORT_STATE_FINISHED;
         free(params->tempArray);
+      }
+      return;
+    }
+  }
+}
+
+void quickSortStep(QuickSortParams *params) {
+  if (params->base.state == SORT_STATE_FINISHED)
+    return;
+
+  // Initialize if starting
+  if (params->base.state == SORT_STATE_IDLE) {
+    params->stackSize = 1;
+    params->stack[0] = (QuickState){
+        0, params->base.size - 1, params->base.size - 1, 0, 0, PARTITION_START};
+    params->base.state = SORT_STATE_RUNNING;
+  }
+
+  // Process current state
+  while (params->stackSize > 0) {
+    QuickState *current = &params->stack[params->stackSize - 1];
+
+    if (current->left >= current->right) {
+      params->stackSize--;
+      continue;
+    }
+
+    switch (current->step) {
+    case PARTITION_START:
+      // Initialize partition
+      current->pivotIndex = current->right;
+      current->i = current->left - 1;
+      current->j = current->left;
+      current->step = PARTITION_PROCESS;
+      return;
+
+    case PARTITION_PROCESS:
+      // Partition array elements
+      if (current->j < current->right) {
+        params->base.comparisons++;
+        if (params->base.array[current->j] <=
+            params->base.array[current->pivotIndex]) {
+          current->i++;
+          if (current->i != current->j) {
+            // Swap elements
+            int temp = params->base.array[current->i];
+            params->base.array[current->i] = params->base.array[current->j];
+            params->base.array[current->j] = temp;
+            params->base.swaps++;
+            setSwapIndex(&params->base.swap_params, current->i, current->j);
+          }
+        }
+        current->j++;
+        return;
+      }
+
+      // Place pivot in final position
+      current->i++;
+      if (current->i != current->pivotIndex) {
+        int temp = params->base.array[current->i];
+        params->base.array[current->i] =
+            params->base.array[current->pivotIndex];
+        params->base.array[current->pivotIndex] = temp;
+        params->base.swaps++;
+        setSwapIndex(&params->base.swap_params, current->i,
+                     current->pivotIndex);
+      }
+      current->step = HANDLE_LEFT;
+      return;
+
+    case HANDLE_LEFT:
+      // Handle left subarray
+      current->step = HANDLE_RIGHT;
+      if (current->left < current->i - 1) {
+        params->stack[params->stackSize++] = (QuickState){
+            current->left, current->i - 1, 0, 0, 0, PARTITION_START};
+      }
+      return;
+
+    case HANDLE_RIGHT:
+      // Handle right subarray
+      params->stackSize--;
+      if (current->i + 1 < current->right) {
+        params->stack[params->stackSize++] = (QuickState){
+            current->i + 1, current->right, 0, 0, 0, PARTITION_START};
+      }
+      if (params->stackSize == 0) {
+        params->base.state = SORT_STATE_FINISHED;
       }
       return;
     }
