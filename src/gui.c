@@ -2,7 +2,6 @@
 #include "raylib.h"
 #include "sorts.h"
 #include "sortviz.h"
-#include "utils.h"
 
 void doSortInGUI(SortType type, int sleep_time) {
   InitWindow(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, WINDOW_TITLE);

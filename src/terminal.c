@@ -1,5 +1,4 @@
 #include "terminal.h"
-#include "utils.h"
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>

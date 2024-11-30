@@ -1,5 +1,4 @@
 #include "sortviz.h"
-#include "utils.h"
 #include <string.h>
 
 void bubbleSortStep(BubbleSortParams *params) {
@@ -111,6 +110,8 @@ void mergeSortStep(MergeSortParams *params) {
     params->stackSize = 1;
     params->stack[0] = (MergeState){0, 0, params->base.size - 1, 0};
     params->tempArray = malloc(params->base.size * sizeof(int));
+    memcpy(params->tempArray, params->base.array,
+           params->base.size * sizeof(int));
     params->base.state = SORT_STATE_RUNNING;
   }
 

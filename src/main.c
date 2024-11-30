@@ -1,5 +1,4 @@
 #include "sortviz.h"
-#include "utils.h"
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>

@@ -1,7 +1,23 @@
 #ifndef SORTVIZ_H
 #define SORTVIZ_H
 
-#define MAX_STACK_SIZE 1000
+#include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
+#define MAX_STACK_SIZE 32
+
+#define sleep(ms) usleep(ms * 1000)
+#define random(min, max) ((rand() % (int)(((max) + 1) - (min))) + (min))
+#define swap(a, b)                                                             \
+  do {                                                                         \
+    if (a != b) {                                                              \
+      int tmp = a;                                                             \
+      a = b;                                                                   \
+      b = tmp;                                                                 \
+    }                                                                          \
+  } while (0)
 
 typedef enum { TERMINAL, GUI } InterfaceType;
 typedef enum { BUBBLE, SELECTION, INSERTION, QUICK, MERGE, NONE } SortType;
@@ -105,6 +121,7 @@ typedef union {
   QuickSortParams quick;
 } SortParamsUnion;
 
+int *createShuffledArray(int size);
 void setInterface(InterfaceType type);
 void doSort(SortType type, int sleep_time);
 void setSwapIndex(SwapParams *params, int new_index1, int new_index2);
