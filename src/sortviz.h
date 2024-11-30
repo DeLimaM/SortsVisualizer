@@ -55,11 +55,25 @@ typedef struct {
   int key;
 } InsertionSortParams;
 
+typedef struct {
+  BaseSortParams base;
+  int *temp_array;
+  int left;
+  int right;
+  int mid;
+  int i;
+  int j;
+  int k;
+  int curr_size;
+  int merge_step;
+} MergeSortParams;
+
 typedef union {
   BaseSortParams base;
   BubbleSortParams bubble;
   SelectionSortParams selection;
   InsertionSortParams insertion;
+  MergeSortParams merge;
 } SortParamsUnion;
 
 void setInterface(InterfaceType type);

@@ -100,3 +100,78 @@ void insertionSortStep(InsertionSortParams *params) {
     }
   }
 }
+
+void mergeSortStep(MergeSortParams *params) {
+  if (params->base.state == SORT_STATE_FINISHED)
+    return;
+
+  int *array = params->base.array;
+  int size = params->base.size;
+
+  if (params->base.state == SORT_STATE_IDLE) {
+    params->temp_array = malloc(size * sizeof(int));
+    params->curr_size = 1;
+    params->merge_step = 0;
+    params->base.state = SORT_STATE_RUNNING;
+  }
+
+  if (params->curr_size < size) {
+    if (params->merge_step == 0) {
+      params->left = 0;
+      params->merge_step = 1;
+    }
+
+    if (params->left < size - 1) {
+      params->mid = params->left + params->curr_size - 1;
+      params->right = (params->mid + params->curr_size < size)
+                          ? params->mid + params->curr_size
+                          : size - 1;
+
+      if (params->i == 0 && params->j == 0) {
+        params->i = params->left;
+        params->j = params->mid + 1;
+        params->k = params->left;
+      }
+
+      if (params->i <= params->mid && params->j <= params->right) {
+        params->base.comparisons++;
+        if (array[params->i] <= array[params->j]) {
+          params->temp_array[params->k] = array[params->i];
+          setInsertIndex(&params->base.insert_params, params->k);
+          params->i++;
+        } else {
+          params->temp_array[params->k] = array[params->j];
+          setInsertIndex(&params->base.insert_params, params->k);
+          params->j++;
+        }
+        params->k++;
+        params->base.inserts++;
+      } else if (params->i <= params->mid) {
+        params->temp_array[params->k] = array[params->i];
+        setInsertIndex(&params->base.insert_params, params->k);
+        params->i++;
+        params->k++;
+        params->base.inserts++;
+      } else if (params->j <= params->right) {
+        params->temp_array[params->k] = array[params->j];
+        setInsertIndex(&params->base.insert_params, params->k);
+        params->j++;
+        params->k++;
+        params->base.inserts++;
+      } else {
+        for (int x = params->left; x <= params->right; x++) {
+          array[x] = params->temp_array[x];
+        }
+        params->left += 2 * params->curr_size;
+        params->i = 0;
+        params->j = 0;
+      }
+    } else {
+      params->curr_size *= 2;
+      params->merge_step = 0;
+    }
+  } else {
+    free(params->temp_array);
+    params->base.state = SORT_STATE_FINISHED;
+  }
+}
