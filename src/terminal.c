@@ -23,7 +23,7 @@ void drawBar(int index, int value, const char *color) {
   for (int i = 0; i < max_bar_height; i++) {
     gotoxy(index, max_bar_height - i + TOP_MARGIN);
     if (i < bar_height) {
-      printf("%s█%s", color, RESET);
+      printf("%s▊%s", color, RESET);
     } else {
       printf(" ");
     }
@@ -136,4 +136,6 @@ void doSortInTerminal(SortType type, int sleep_time) {
   gotoxy(0, lines);
   printf("\n");
   show_cursor();
+
+  free(params.base.array);
 }
