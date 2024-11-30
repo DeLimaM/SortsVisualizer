@@ -17,8 +17,7 @@ void bubbleSortStep(BubbleSortParams *params) {
   if (params->j < size - params->i - 1) {
     if (array[params->j] > array[params->j + 1]) {
       swap(array[params->j], array[params->j + 1]);
-      setSwapIndex1(&params->base.swap_params, params->j);
-      setSwapIndex2(&params->base.swap_params, params->j + 1);
+      setSwapIndex(&params->base.swap_params, params->j, params->j + 1);
       params->base.swaps++;
     }
     params->base.comparisons++;
@@ -55,8 +54,7 @@ void selectionSortStep(SelectionSortParams *params) {
   } else {
     if (params->index_min != params->i) {
       swap(array[params->i], array[params->index_min]);
-      setSwapIndex1(&params->base.swap_params, params->i);
-      setSwapIndex2(&params->base.swap_params, params->index_min);
+      setSwapIndex(&params->base.swap_params, params->i, params->index_min);
       params->base.swaps++;
     }
     params->i++;

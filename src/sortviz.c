@@ -12,13 +12,10 @@ void setInsertIndex(InsertParams *params, int new_index) {
   params->index = new_index;
 }
 
-void setSwapIndex1(SwapParams *params, int new_index1) {
+void setSwapIndex(SwapParams *params, int new_index1, int new_index2) {
   params->prev_index1 = params->index1;
-  params->index1 = new_index1;
-}
-
-void setSwapIndex2(SwapParams *params, int new_index2) {
   params->prev_index2 = params->index2;
+  params->index1 = new_index1;
   params->index2 = new_index2;
 }
 

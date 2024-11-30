@@ -64,8 +64,7 @@ typedef union {
 
 void setInterface(InterfaceType type);
 void doSort(SortType type, int sleep_time);
-void setSwapIndex1(SwapParams *params, int new_index1);
-void setSwapIndex2(SwapParams *params, int new_index2);
+void setSwapIndex(SwapParams *params, int new_index1, int new_index2);
 void setInsertIndex(InsertParams *params, int new_index);
 
 #endif // SORTVIZ_H
