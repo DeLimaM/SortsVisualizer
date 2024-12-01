@@ -2,10 +2,12 @@
 #include "raylib.h"
 #include "sorts.h"
 #include "sortviz.h"
+#include <stdio.h>
 
 int width;
-int array_size;
+int height;
 int bar_width;
+int max_value;
 int bar_height_multiplier;
 
 SortType type;
@@ -14,13 +16,13 @@ void drawBarGUI(int index, int value, Color color) {
   if (index < 0)
     return;
 
-  int max_bar_height = GetScreenHeight() - INDICATORS_ZONE_HEIGHT;
-  int bar_height =
-      ((value * max_bar_height) / GetScreenWidth()) * bar_height_multiplier;
-  DrawRectangle(index * bar_width, GetScreenHeight() - bar_height, bar_width,
-                bar_height, color);
+  int max_bar_height = height - INDICATORS_ZONE_HEIGHT;
+  int bar_height = (value * max_bar_height) / max_value;
+
+  DrawRectangle(index * bar_width, height - bar_height, bar_width, bar_height,
+                color);
   DrawRectangle(index * bar_width, INDICATORS_ZONE_HEIGHT, bar_width,
-                GetScreenHeight() - bar_height, BACKGROUND_COLOR);
+                height - bar_height, BACKGROUND_COLOR);
 }
 
 void drawIndicatorsGUI(SortParamsUnion *params) {
@@ -41,6 +43,9 @@ void drawIndicatorsGUI(SortParamsUnion *params) {
            INDICATORS_MARGIN, INDICATORS_FONT_SIZE, WHITE);
   DrawText(TextFormat("Type: %s", type_str), INDICATORS_MARGIN,
            INDICATORS_MARGIN + INDICATORS_FONT_SIZE, INDICATORS_FONT_SIZE,
+           WHITE);
+  DrawText(TextFormat("Array size: %d", params->base.size), INDICATORS_MARGIN,
+           INDICATORS_MARGIN + 2 * INDICATORS_FONT_SIZE, INDICATORS_FONT_SIZE,
            WHITE);
 
   DrawText(TextFormat("Comparisons: %d", params->base.comparisons),
@@ -76,11 +81,21 @@ void drawFullArrayGUI(SortParamsUnion *params) {
 void doSortInGUI(SortType type, int sleep_time, int array_size) {
   InitWindow(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, WINDOW_TITLE);
   SetWindowState(FLAG_WINDOW_RESIZABLE);
+  SetWindowMinSize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT);
   SetTargetFPS(60);
 
   width = GetScreenWidth();
-  bar_width = width / array_size;
-  bar_height_multiplier = width / array_size;
+  height = GetScreenHeight();
+
+  if (array_size > width) {
+    printf("WARNING - Array size is too big for the window !\n");
+    printf("          Resizing to the window width: %d\n", width);
+    array_size = width;
+  }
+
+  bar_width = width / array_size > 1 ? width / array_size : 1;
+  max_value = array_size + 1;
+  bar_height_multiplier = max_value / (height - INDICATORS_ZONE_HEIGHT);
 
   SortParamsUnion params;
   initBaseParams(&params.base, array_size, sleep_time, type);
@@ -92,6 +107,17 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
     double currentTime = GetTime();
 
     BeginDrawing();
+
+    if (IsWindowResized()) {
+      width = GetScreenWidth();
+      height = GetScreenHeight();
+      bar_width = width / array_size > 1 ? width / array_size : 1;
+      max_value = array_size + 1;
+      bar_height_multiplier = max_value / (height - INDICATORS_ZONE_HEIGHT);
+
+      printf("Resized to: %d x %d\n", width, height);
+      printf("Bar width: %d\n", bar_width);
+    }
 
     if (currentTime - lastUpdate >= 0 / 1000.0 &&
         params.base.state != SORT_STATE_FINISHED) {
