@@ -50,7 +50,7 @@ void drawIndicatorsGUI(SortParamsUnion *params) {
 
   DrawText(TextFormat("Comparisons: %d", params->base.comparisons),
            INDICATORS_MARGIN + INDICATORS_WIDTH, INDICATORS_MARGIN,
-           INDICATORS_FONT_SIZE, BAR_COLOR);
+           INDICATORS_FONT_SIZE, WHITE);
   DrawText(TextFormat("Swaps: %d", params->base.swaps),
            INDICATORS_MARGIN + INDICATORS_WIDTH,
            INDICATORS_MARGIN + INDICATORS_FONT_SIZE, INDICATORS_FONT_SIZE, RED);
@@ -79,19 +79,21 @@ void drawFullArrayGUI(SortParamsUnion *params) {
 }
 
 void doSortInGUI(SortType type, int sleep_time, int array_size) {
-  InitWindow(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, WINDOW_TITLE);
+  width = WINDOW_DEFAULT_WIDTH;
+  height = WINDOW_DEFAULT_HEIGHT;
+
+  int monitor_width = DEFAULT_MONITOR_WIDTH;
+  if (array_size > monitor_width) {
+    printf("    Array size %d is too big for the screen\n", array_size);
+    printf("    Resizing window to %d to account for the array size\n",
+           monitor_width);
+    width = monitor_width;
+    array_size = monitor_width;
+  }
+
+  InitWindow(width, height, WINDOW_TITLE);
   SetWindowState(FLAG_WINDOW_RESIZABLE);
   SetWindowMinSize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT);
-  SetTargetFPS(60);
-
-  width = GetScreenWidth();
-  height = GetScreenHeight();
-
-  if (array_size > width) {
-    printf("WARNING - Array size is too big for the window !\n");
-    printf("          Resizing to the window width: %d\n", width);
-    array_size = width;
-  }
 
   bar_width = width / array_size > 1 ? width / array_size : 1;
   max_value = array_size + 1;
@@ -114,9 +116,6 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
       bar_width = width / array_size > 1 ? width / array_size : 1;
       max_value = array_size + 1;
       bar_height_multiplier = max_value / (height - INDICATORS_ZONE_HEIGHT);
-
-      printf("Resized to: %d x %d\n", width, height);
-      printf("Bar width: %d\n", bar_width);
     }
 
     if (currentTime - lastUpdate >= 0 / 1000.0 &&
