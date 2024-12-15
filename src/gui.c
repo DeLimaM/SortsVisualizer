@@ -14,16 +14,17 @@ SortType type;
 Font font;
 
 void drawBarGUI(int index, int value, Color color) {
-  if (index < 0)
+  if (index < 0 || value <= 0)
     return;
 
-  int bar_height =
-      value * bar_height_multiplier > 0 ? value * bar_height_multiplier : 1;
   int x = index * (bar_width + BAR_SPACING);
-  int y = height - bar_height;
+  int bar_height = (int)(value * bar_height_multiplier);
+  if (bar_height < 1)
+    bar_height = 1;
 
-  DrawRectangle(x, y, bar_width, bar_height, color);
-  DrawRectangle(x, INDICATORS_ZONE_HEIGHT, bar_width, y, BACKGROUND_COLOR);
+  Rectangle barRect = {(float)x, (float)(height - bar_height), (float)bar_width,
+                       (float)bar_height};
+  DrawRectangleRec(barRect, color);
 }
 
 void drawIndicatorsGUI(SortParamsUnion *params) {
@@ -32,35 +33,30 @@ void drawIndicatorsGUI(SortParamsUnion *params) {
                               ? "FINISHED"
                           : params->base.state == SORT_STATE_PAUSED ? "PAUSED"
                                                                     : "IDLE";
-
   const char *type_str = params->base.type == BUBBLE      ? "BUBBLE"
                          : params->base.type == SELECTION ? "SELECTION"
                          : params->base.type == INSERTION ? "INSERTION"
                          : params->base.type == MERGE     ? "MERGE"
                          : params->base.type == QUICK     ? "QUICK"
                                                           : "NONE";
-
-  Vector2 position = {INDICATORS_MARGIN, INDICATORS_MARGIN};
-  DrawTextEx(font, TextFormat("State: %s", state_str), position,
-             INDICATORS_FONT_SIZE, 1, WHITE);
-  position.y += INDICATORS_FONT_SIZE;
-  DrawTextEx(font, TextFormat("Type: %s", type_str), position,
-             INDICATORS_FONT_SIZE, 1, WHITE);
-  position.y += INDICATORS_FONT_SIZE;
-  DrawTextEx(font, TextFormat("Size: %d", params->base.size), position,
+  const char *base_text = TextFormat("State: %s\nType: %s\nSize: %d", state_str,
+                                     type_str, params->base.size);
+  DrawTextEx(font, base_text, (Vector2){INDICATORS_MARGIN, INDICATORS_MARGIN},
              INDICATORS_FONT_SIZE, 1, WHITE);
 
-  Vector2 statsPos = {INDICATORS_MARGIN + INDICATORS_WIDTH, INDICATORS_MARGIN};
+  Vector2 right_pos = {INDICATORS_MARGIN + INDICATORS_WIDTH, INDICATORS_MARGIN};
   DrawTextEx(font, TextFormat("Comparisons: %d", params->base.comparisons),
-             statsPos, INDICATORS_FONT_SIZE, 1, WHITE);
+             right_pos, INDICATORS_FONT_SIZE, 1, WHITE);
+  right_pos.y += INDICATORS_FONT_SIZE;
+  if (params->base.type == INSERTION || params->base.type == MERGE) {
+    DrawTextEx(font, TextFormat("Inserts: %d", params->base.inserts), right_pos,
+               INDICATORS_FONT_SIZE, 1, GREEN);
+  } else {
+    DrawTextEx(font, TextFormat("Swaps: %d", params->base.swaps), right_pos,
+               INDICATORS_FONT_SIZE, 1, RED);
+  }
 
-  statsPos.y += INDICATORS_FONT_SIZE;
-  DrawTextEx(font, TextFormat("Swaps: %d", params->base.swaps), statsPos,
-             INDICATORS_FONT_SIZE, 1, RED);
-
-  statsPos.y += INDICATORS_FONT_SIZE;
-  DrawTextEx(font, TextFormat("Inserts: %d", params->base.inserts), statsPos,
-             INDICATORS_FONT_SIZE, 1, GREEN);
+  DrawFPS(width - 100, 0);
 }
 
 void drawFullArrayGUI(SortParamsUnion *params) {
@@ -80,16 +76,28 @@ void drawFullArrayGUI(SortParamsUnion *params) {
 }
 
 void processBarWidthAndHeight(int size, int width, int height) {
+  static int last_size = 0;
+  static int last_width = 0;
+  static int last_height = 0;
+
+  if (size == last_size && width == last_width && height == last_height) {
+    return;
+  }
+
   int total_spacing = (size - 1) * BAR_SPACING;
   bar_width = (width - total_spacing) / size;
   bar_height_multiplier = (float)(height - INDICATORS_ZONE_HEIGHT) / size;
+
+  last_size = size;
+  last_width = width;
+  last_height = height;
 }
 
 void doSortInGUI(SortType type, int sleep_time, int array_size) {
-  SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN);
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN |
+                 FLAG_VSYNC_HINT);
   size_t factor = 80;
   InitWindow(factor * 16, factor * 9, WINDOW_TITLE);
-  SetTargetFPS(60);
   SetExitKey(KEY_NULL);
 
   font = LoadFontEx("fonts/LexendExa.ttf", INDICATORS_FONT_SIZE, NULL, 0);
@@ -97,28 +105,45 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
   SortParamsUnion params;
   initBaseParams(&params.base, array_size, sleep_time, type);
 
-  width = GetScreenWidth();
+  // TODO : delete this and replace with an interval-based update in the
+  // terminal version
+  params.base.sleep_time = 0;
 
-  if (params.base.size > width) {
-    params.base.size = width;
+  width = GetScreenWidth();
+  int max_size = width / (1 + BAR_SPACING);
+  if (params.base.size > max_size) {
+    params.base.size = max_size;
     params.base.array = createShuffledArray(params.base.size);
 
-    printf("Array size is too big for the window, resizing to %d\n",
+    printf("[Warning] - Array size is too big for the window, resizing to %d\n",
            params.base.size);
   }
 
   type = params.base.type;
-  double lastUpdate = GetTime();
+
+  static const int REFRESH_RATES[] = REFRESH_RATES_VALUES;
+  int current_rate_index = DEFAULT_REFRESH_RATE_INDEX;
+  double update_interval = 1.0 / REFRESH_RATES[current_rate_index];
+  double last_update = GetTime();
 
   while (!WindowShouldClose()) {
-    double currentTime = GetTime();
+    double current_time = GetTime();
+
+    if (IsKeyPressed(KEY_UP)) {
+      current_rate_index = (current_rate_index + 1) % REFRESH_RATES_COUNT;
+    } else if (IsKeyPressed(KEY_DOWN)) {
+      current_rate_index =
+          (current_rate_index - 1 + REFRESH_RATES_COUNT) % REFRESH_RATES_COUNT;
+    }
+    update_interval = 1.0 / REFRESH_RATES[current_rate_index];
+
     width = GetScreenWidth();
     height = GetScreenHeight();
     processBarWidthAndHeight(params.base.size, width, height);
 
     BeginDrawing();
 
-    if (currentTime - lastUpdate >= 0 / 1000.0 &&
+    if (current_time - last_update >= update_interval &&
         params.base.state != SORT_STATE_FINISHED) {
 
       switch (params.base.type) {
@@ -141,11 +166,16 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
         break;
       }
 
-      lastUpdate = currentTime;
+      last_update = current_time;
 
       ClearBackground(BACKGROUND_COLOR);
       drawFullArrayGUI(&params);
     }
+
+    DrawTextEx(
+        font,
+        TextFormat("Refresh Rate: %dHz", REFRESH_RATES[current_rate_index]),
+        (Vector2){width - 200, height - 30}, INDICATORS_FONT_SIZE, 1, WHITE);
 
     EndDrawing();
   }
