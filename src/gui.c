@@ -7,22 +7,23 @@
 int width;
 int height;
 int bar_width;
-int max_value;
-int bar_height_multiplier;
+float bar_height_multiplier;
 
 SortType type;
+
+Font font;
 
 void drawBarGUI(int index, int value, Color color) {
   if (index < 0)
     return;
 
-  int max_bar_height = height - INDICATORS_ZONE_HEIGHT;
-  int bar_height = (value * max_bar_height) / max_value;
+  int bar_height =
+      value * bar_height_multiplier > 0 ? value * bar_height_multiplier : 1;
+  int x = index * (bar_width + BAR_SPACING);
+  int y = height - bar_height;
 
-  DrawRectangle(index * bar_width, height - bar_height, bar_width, bar_height,
-                color);
-  DrawRectangle(index * bar_width, INDICATORS_ZONE_HEIGHT, bar_width,
-                height - bar_height, BACKGROUND_COLOR);
+  DrawRectangle(x, y, bar_width, bar_height, color);
+  DrawRectangle(x, INDICATORS_ZONE_HEIGHT, bar_width, y, BACKGROUND_COLOR);
 }
 
 void drawIndicatorsGUI(SortParamsUnion *params) {
@@ -39,27 +40,27 @@ void drawIndicatorsGUI(SortParamsUnion *params) {
                          : params->base.type == QUICK     ? "QUICK"
                                                           : "NONE";
 
-  DrawText(TextFormat("State: %s", state_str), INDICATORS_MARGIN,
-           INDICATORS_MARGIN, INDICATORS_FONT_SIZE, WHITE);
-  DrawText(TextFormat("Type: %s", type_str), INDICATORS_MARGIN,
-           INDICATORS_MARGIN + INDICATORS_FONT_SIZE, INDICATORS_FONT_SIZE,
-           WHITE);
-  DrawText(TextFormat("Array size: %d", params->base.size), INDICATORS_MARGIN,
-           INDICATORS_MARGIN + 2 * INDICATORS_FONT_SIZE, INDICATORS_FONT_SIZE,
-           WHITE);
+  Vector2 position = {INDICATORS_MARGIN, INDICATORS_MARGIN};
+  DrawTextEx(font, TextFormat("State: %s", state_str), position,
+             INDICATORS_FONT_SIZE, 1, WHITE);
+  position.y += INDICATORS_FONT_SIZE;
+  DrawTextEx(font, TextFormat("Type: %s", type_str), position,
+             INDICATORS_FONT_SIZE, 1, WHITE);
+  position.y += INDICATORS_FONT_SIZE;
+  DrawTextEx(font, TextFormat("Size: %d", params->base.size), position,
+             INDICATORS_FONT_SIZE, 1, WHITE);
 
-  DrawText(TextFormat("Comparisons: %d", params->base.comparisons),
-           INDICATORS_MARGIN + INDICATORS_WIDTH, INDICATORS_MARGIN,
-           INDICATORS_FONT_SIZE, WHITE);
-  DrawText(TextFormat("Swaps: %d", params->base.swaps),
-           INDICATORS_MARGIN + INDICATORS_WIDTH,
-           INDICATORS_MARGIN + INDICATORS_FONT_SIZE, INDICATORS_FONT_SIZE, RED);
-  DrawText(TextFormat("Inserts: %d", params->base.inserts),
-           INDICATORS_MARGIN + INDICATORS_WIDTH,
-           INDICATORS_MARGIN + 2 * INDICATORS_FONT_SIZE, INDICATORS_FONT_SIZE,
-           GREEN);
+  Vector2 statsPos = {INDICATORS_MARGIN + INDICATORS_WIDTH, INDICATORS_MARGIN};
+  DrawTextEx(font, TextFormat("Comparisons: %d", params->base.comparisons),
+             statsPos, INDICATORS_FONT_SIZE, 1, WHITE);
 
-  DrawFPS(width - 90, 10);
+  statsPos.y += INDICATORS_FONT_SIZE;
+  DrawTextEx(font, TextFormat("Swaps: %d", params->base.swaps), statsPos,
+             INDICATORS_FONT_SIZE, 1, RED);
+
+  statsPos.y += INDICATORS_FONT_SIZE;
+  DrawTextEx(font, TextFormat("Inserts: %d", params->base.inserts), statsPos,
+             INDICATORS_FONT_SIZE, 1, GREEN);
 }
 
 void drawFullArrayGUI(SortParamsUnion *params) {
@@ -78,45 +79,44 @@ void drawFullArrayGUI(SortParamsUnion *params) {
   drawIndicatorsGUI(params);
 }
 
+void processBarWidthAndHeight(int size, int width, int height) {
+  int total_spacing = (size - 1) * BAR_SPACING;
+  bar_width = (width - total_spacing) / size;
+  bar_height_multiplier = (float)(height - INDICATORS_ZONE_HEIGHT) / size;
+}
+
 void doSortInGUI(SortType type, int sleep_time, int array_size) {
-  width = WINDOW_DEFAULT_WIDTH;
-  height = WINDOW_DEFAULT_HEIGHT;
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN);
+  size_t factor = 80;
+  InitWindow(factor * 16, factor * 9, WINDOW_TITLE);
+  SetTargetFPS(60);
+  SetExitKey(KEY_NULL);
 
-  int monitor_width = DEFAULT_MONITOR_WIDTH;
-  if (array_size > monitor_width) {
-    printf("    Array size %d is too big for the screen\n", array_size);
-    printf("    Resizing window to %d to account for the array size\n",
-           monitor_width);
-    width = monitor_width;
-    array_size = monitor_width;
-  }
-
-  InitWindow(width, height, WINDOW_TITLE);
-  SetWindowState(FLAG_WINDOW_RESIZABLE);
-  SetWindowMinSize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT);
-
-  bar_width = width / array_size > 1 ? width / array_size : 1;
-  max_value = array_size + 1;
-  bar_height_multiplier = max_value / (height - INDICATORS_ZONE_HEIGHT);
+  font = LoadFontEx("fonts/LexendExa.ttf", INDICATORS_FONT_SIZE, NULL, 0);
 
   SortParamsUnion params;
   initBaseParams(&params.base, array_size, sleep_time, type);
+
+  width = GetScreenWidth();
+
+  if (params.base.size > width) {
+    params.base.size = width;
+    params.base.array = createShuffledArray(params.base.size);
+
+    printf("Array size is too big for the window, resizing to %d\n",
+           params.base.size);
+  }
 
   type = params.base.type;
   double lastUpdate = GetTime();
 
   while (!WindowShouldClose()) {
     double currentTime = GetTime();
+    width = GetScreenWidth();
+    height = GetScreenHeight();
+    processBarWidthAndHeight(params.base.size, width, height);
 
     BeginDrawing();
-
-    if (IsWindowResized()) {
-      width = GetScreenWidth();
-      height = GetScreenHeight();
-      bar_width = width / array_size > 1 ? width / array_size : 1;
-      max_value = array_size + 1;
-      bar_height_multiplier = max_value / (height - INDICATORS_ZONE_HEIGHT);
-    }
 
     if (currentTime - lastUpdate >= 0 / 1000.0 &&
         params.base.state != SORT_STATE_FINISHED) {
@@ -150,6 +150,7 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
     EndDrawing();
   }
 
+  UnloadFont(font);
   CloseWindow();
 
   free(params.base.array);
