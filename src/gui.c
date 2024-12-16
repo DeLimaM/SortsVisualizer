@@ -4,20 +4,22 @@
 #include "sortviz.h"
 #include <stdio.h>
 
-int width;
-int height;
-int bar_width;
+float width;
+float height;
+float bar_width = 0;
+float bar_spacing = 1;
 float bar_height_multiplier;
 
 SortType type;
 
 Font font;
+int current_refresh_rate;
 
 void drawBarGUI(int index, int value, Color color) {
   if (index < 0 || value <= 0)
     return;
 
-  int x = index * (bar_width + BAR_SPACING);
+  int x = index * (bar_width + bar_spacing);
   int bar_height = (int)(value * bar_height_multiplier);
   if (bar_height < 1)
     bar_height = 1;
@@ -56,41 +58,37 @@ void drawIndicatorsGUI(SortParamsUnion *params) {
                INDICATORS_FONT_SIZE, 1, RED);
   }
 
-  DrawFPS(width - 100, 0);
+  Vector2 bottom_pos = {INDICATORS_MARGIN + INDICATORS_WIDTH,
+                        height - INDICATORS_ZONE_HEIGHT};
+  DrawTextEx(font, TextFormat("Refresh rate: %d Hz", current_refresh_rate),
+             bottom_pos, INDICATORS_FONT_SIZE, 1, WHITE);
 }
 
 void drawFullArrayGUI(SortParamsUnion *params) {
   int *array = params->base.array;
   int size = params->base.size;
   for (int i = 0; i < size; i++) {
-    if (i == params->base.swap_params.index1 ||
-        i == params->base.swap_params.index2) {
-      drawBarGUI(i, array[i], RED);
-    } else if (i == params->base.insert_params.index) {
+    if (params->base.state == SORT_STATE_FINISHED) {
       drawBarGUI(i, array[i], GREEN);
     } else {
-      drawBarGUI(i, array[i], BAR_COLOR);
+      if (i == params->base.swap_params.index1 ||
+          i == params->base.swap_params.index2) {
+        drawBarGUI(i, array[i], RED);
+      } else if (i == params->base.insert_params.index) {
+        drawBarGUI(i, array[i], GREEN);
+      } else {
+        drawBarGUI(i, array[i], BAR_COLOR);
+      }
     }
   }
   drawIndicatorsGUI(params);
 }
 
 void processBarWidthAndHeight(int size, int width, int height) {
-  static int last_size = 0;
-  static int last_width = 0;
-  static int last_height = 0;
-
-  if (size == last_size && width == last_width && height == last_height) {
-    return;
-  }
-
-  int total_spacing = (size - 1) * BAR_SPACING;
+  float total_spacing = bar_spacing * size;
   bar_width = (width - total_spacing) / size;
-  bar_height_multiplier = (float)(height - INDICATORS_ZONE_HEIGHT) / size;
 
-  last_size = size;
-  last_width = width;
-  last_height = height;
+  bar_height_multiplier = (float)(height - INDICATORS_ZONE_HEIGHT) / size;
 }
 
 void doSortInGUI(SortType type, int sleep_time, int array_size) {
@@ -99,6 +97,7 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
   size_t factor = 80;
   InitWindow(factor * 16, factor * 9, WINDOW_TITLE);
   SetExitKey(KEY_NULL);
+  SetTargetFPS(60);
 
   font = LoadFontEx("fonts/LexendExa.ttf", INDICATORS_FONT_SIZE, NULL, 0);
 
@@ -110,6 +109,7 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
   params.base.sleep_time = 0;
 
   width = GetScreenWidth();
+  height = GetScreenHeight();
   int max_size = width / (1 + BAR_SPACING);
   if (params.base.size > max_size) {
     params.base.size = max_size;
@@ -118,12 +118,14 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
     printf("[Warning] - Array size is too big for the window, resizing to %d\n",
            params.base.size);
   }
+  processBarWidthAndHeight(params.base.size, width, height);
 
   type = params.base.type;
 
-  static const int REFRESH_RATES[] = REFRESH_RATES_VALUES;
+  static int REFRESH_RATES[] = REFRESH_RATES_VALUES;
   int current_rate_index = DEFAULT_REFRESH_RATE_INDEX;
   double update_interval = 1.0 / REFRESH_RATES[current_rate_index];
+  current_refresh_rate = REFRESH_RATES[current_rate_index];
   double last_update = GetTime();
 
   while (!WindowShouldClose()) {
@@ -136,6 +138,7 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
           (current_rate_index - 1 + REFRESH_RATES_COUNT) % REFRESH_RATES_COUNT;
     }
     update_interval = 1.0 / REFRESH_RATES[current_rate_index];
+    current_refresh_rate = REFRESH_RATES[current_rate_index];
 
     width = GetScreenWidth();
     height = GetScreenHeight();
@@ -143,8 +146,7 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
 
     BeginDrawing();
 
-    if (current_time - last_update >= update_interval &&
-        params.base.state != SORT_STATE_FINISHED) {
+    if (current_time - last_update >= update_interval) {
 
       switch (params.base.type) {
       case BUBBLE:
@@ -171,11 +173,6 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
       ClearBackground(BACKGROUND_COLOR);
       drawFullArrayGUI(&params);
     }
-
-    DrawTextEx(
-        font,
-        TextFormat("Refresh Rate: %dHz", REFRESH_RATES[current_rate_index]),
-        (Vector2){width - 200, height - 30}, INDICATORS_FONT_SIZE, 1, WHITE);
 
     EndDrawing();
   }
