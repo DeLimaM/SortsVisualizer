@@ -9,8 +9,8 @@
 #define RESET "\x1b[0m"
 
 #define MAX_STACK_SIZE 32
+#define REFRESH_RATE 120
 
-#define sleep(ms) usleep(ms * 1000)
 #define random(min, max) ((rand() % (int)(((max) + 1) - (min))) + (min))
 #define swap(a, b)                                                             \
   do {                                                                         \
@@ -45,7 +45,6 @@ typedef struct {
 typedef struct {
   int *array;
   int size;
-  int sleep_time;
   SortType type;
   SwapParams swap_params;
   InsertParams insert_params;
@@ -103,8 +102,8 @@ typedef struct {
   int left;
   int right;
   int pivotIndex;
-  int i; // Current scanning index
-  int j; // Final pivot position
+  int i;
+  int j;
   QuickSortStep step;
 } QuickState;
 
@@ -123,11 +122,9 @@ typedef union {
   QuickSortParams quick;
 } SortParamsUnion;
 
-void initBaseParams(BaseSortParams *params, int size, int sleep_time,
-                    SortType type);
+void initBaseParams(BaseSortParams *params, int size, SortType type);
 int *createShuffledArray(int size);
-void doSort(SortType type, InterfaceType interface, int sleep_time,
-            int array_size);
+void doSort(SortType type, InterfaceType interface, int array_size);
 void setSwapIndex(SwapParams *params, int new_index1, int new_index2);
 void setInsertIndex(InsertParams *params, int new_index);
 

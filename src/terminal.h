@@ -6,6 +6,7 @@
 #define RED "\x1b[31m"
 #define WHITE "\x1b[37m"
 #define GREEN "\x1b[32m"
+#define ORANGE "\x1b[33m"
 
 #define TOP_MARGIN 2
 #define COUNTERS_MARGIN 1
@@ -15,6 +16,6 @@
 #define hide_cursor() printf("\e[?25l")
 #define show_cursor() printf("\e[?25h")
 
-void doSortInTerminal(SortType type, int sleep_time);
+void doSortInTerminal(SortType type);
 
 #endif // TERMINAL_H

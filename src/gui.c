@@ -52,16 +52,11 @@ void drawIndicatorsGUI(SortParamsUnion *params) {
   right_pos.y += INDICATORS_FONT_SIZE;
   if (params->base.type == INSERTION || params->base.type == MERGE) {
     DrawTextEx(font, TextFormat("Inserts: %d", params->base.inserts), right_pos,
-               INDICATORS_FONT_SIZE, 1, GREEN);
+               INDICATORS_FONT_SIZE, 1, ORANGE);
   } else {
     DrawTextEx(font, TextFormat("Swaps: %d", params->base.swaps), right_pos,
                INDICATORS_FONT_SIZE, 1, RED);
   }
-
-  Vector2 bottom_pos = {INDICATORS_MARGIN + INDICATORS_WIDTH,
-                        height - INDICATORS_ZONE_HEIGHT};
-  DrawTextEx(font, TextFormat("Refresh rate: %d Hz", current_refresh_rate),
-             bottom_pos, INDICATORS_FONT_SIZE, 1, WHITE);
 }
 
 void drawFullArrayGUI(SortParamsUnion *params) {
@@ -75,7 +70,7 @@ void drawFullArrayGUI(SortParamsUnion *params) {
           i == params->base.swap_params.index2) {
         drawBarGUI(i, array[i], RED);
       } else if (i == params->base.insert_params.index) {
-        drawBarGUI(i, array[i], GREEN);
+        drawBarGUI(i, array[i], ORANGE);
       } else {
         drawBarGUI(i, array[i], BAR_COLOR);
       }
@@ -91,7 +86,7 @@ void processBarWidthAndHeight(int size, int width, int height) {
   bar_height_multiplier = (float)(height - INDICATORS_ZONE_HEIGHT) / size;
 }
 
-void doSortInGUI(SortType type, int sleep_time, int array_size) {
+void doSortInGUI(SortType type, int array_size) {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_ALWAYS_RUN |
                  FLAG_VSYNC_HINT);
   size_t factor = 80;
@@ -102,11 +97,7 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
   font = LoadFontEx("fonts/LexendExa.ttf", INDICATORS_FONT_SIZE, NULL, 0);
 
   SortParamsUnion params;
-  initBaseParams(&params.base, array_size, sleep_time, type);
-
-  // TODO : delete this and replace with an interval-based update in the
-  // terminal version
-  params.base.sleep_time = 0;
+  initBaseParams(&params.base, array_size, type);
 
   width = GetScreenWidth();
   height = GetScreenHeight();
@@ -122,23 +113,11 @@ void doSortInGUI(SortType type, int sleep_time, int array_size) {
 
   type = params.base.type;
 
-  static int REFRESH_RATES[] = REFRESH_RATES_VALUES;
-  int current_rate_index = DEFAULT_REFRESH_RATE_INDEX;
-  double update_interval = 1.0 / REFRESH_RATES[current_rate_index];
-  current_refresh_rate = REFRESH_RATES[current_rate_index];
+  double update_interval = 1.0 / REFRESH_RATE;
   double last_update = GetTime();
 
   while (!WindowShouldClose()) {
     double current_time = GetTime();
-
-    if (IsKeyPressed(KEY_UP)) {
-      current_rate_index = (current_rate_index + 1) % REFRESH_RATES_COUNT;
-    } else if (IsKeyPressed(KEY_DOWN)) {
-      current_rate_index =
-          (current_rate_index - 1 + REFRESH_RATES_COUNT) % REFRESH_RATES_COUNT;
-    }
-    update_interval = 1.0 / REFRESH_RATES[current_rate_index];
-    current_refresh_rate = REFRESH_RATES[current_rate_index];
 
     width = GetScreenWidth();
     height = GetScreenHeight();

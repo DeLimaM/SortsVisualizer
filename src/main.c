@@ -1,13 +1,6 @@
 #include "sortviz.h"
-#include <signal.h>
 #include <stdio.h>
 #include <string.h>
-
-void signalHandler(int signal) {
-  if (signal == SIGINT) {
-    exit(0);
-  }
-}
 
 void printUsage() {
   printf("  Usage: sortviz [OPTIONS]\n");
@@ -17,18 +10,17 @@ void printUsage() {
   printf("    --insertion, -i\n");
   printf("    --quick, -q\n");
   printf("    --merge, -m\n");
-  printf("    --stime <value>\n");
-  printf("  Example: sortviz --bubble --stime 50\n");
+  printf("    --gui <do the sort in a gui>\n");
+  printf(
+      "    --size <size of the array (only accounted for in the gui mode)>\n");
+  printf("  Example: sortviz --bubble\n");
+  printf("           sortviz -b --gui\n");
 }
 
 // ----------------- MAIN -----------------
 int main(int argc, char *argv[]) {
-
-  signal(SIGINT, signalHandler);
-
   SortType type = NONE;
   InterfaceType interface = TERMINAL;
-  int sleep_time = 5;
   int array_size = 100;
 
   for (int i = 1; i < argc; i++) {
@@ -44,14 +36,6 @@ int main(int argc, char *argv[]) {
       type = QUICK;
     } else if (strcmp(argv[i], "--merge") == 0 || strcmp(argv[i], "-m") == 0) {
       type = MERGE;
-    } else if (strcmp(argv[i], "--stime") == 0) {
-      if (i + 1 < argc) {
-        sleep_time = atoi(argv[++i]);
-      } else {
-        printf("Error: --stime requires a value\n");
-        printUsage();
-        return 1;
-      }
     } else if (strcmp(argv[i], "--size") == 0) {
       if (i + 1 < argc) {
         array_size = atoi(argv[++i]);
@@ -75,7 +59,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (!(type == NONE)) {
-    doSort(type, interface, sleep_time, array_size);
+    doSort(type, interface, array_size);
   } else {
     printf("Error: no sorting algorithm specified\n");
     printUsage();

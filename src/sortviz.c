@@ -3,11 +3,9 @@
 #include "sorts.h"
 #include "terminal.h"
 
-void initBaseParams(BaseSortParams *params, int size, int sleep_time,
-                    SortType type) {
+void initBaseParams(BaseSortParams *params, int size, SortType type) {
   params->array = createShuffledArray(size);
   params->size = size;
-  params->sleep_time = sleep_time;
   params->type = type;
   params->state = SORT_STATE_IDLE;
   params->swaps = 0;
@@ -52,13 +50,13 @@ void setSwapIndex(SwapParams *params, int new_index1, int new_index2) {
   params->index2 = new_index2;
 }
 
-void doSort(SortType type, InterfaceType interface, int sleep_time, int size) {
+void doSort(SortType type, InterfaceType interface, int size) {
   switch (interface) {
   case TERMINAL:
-    doSortInTerminal(type, sleep_time);
+    doSortInTerminal(type);
     break;
   case GUI:
-    doSortInGUI(type, sleep_time, size);
+    doSortInGUI(type, size);
     break;
   }
 }

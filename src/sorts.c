@@ -105,7 +105,6 @@ void mergeSortStep(MergeSortParams *params) {
   if (params->base.state == SORT_STATE_FINISHED)
     return;
 
-  // initialize if starting
   if (params->base.state == SORT_STATE_IDLE) {
     params->stackSize = 1;
     params->stack[0] = (MergeState){0, 0, params->base.size - 1, 0};
@@ -115,7 +114,6 @@ void mergeSortStep(MergeSortParams *params) {
     params->base.state = SORT_STATE_RUNNING;
   }
 
-  // process current state
   while (params->stackSize > 0) {
     MergeState *current = &params->stack[params->stackSize - 1];
 
@@ -183,7 +181,6 @@ void quickSortStep(QuickSortParams *params) {
   if (params->base.state == SORT_STATE_FINISHED)
     return;
 
-  // Initialize if starting
   if (params->base.state == SORT_STATE_IDLE) {
     params->stackSize = 1;
     params->stack[0] = (QuickState){
@@ -191,7 +188,6 @@ void quickSortStep(QuickSortParams *params) {
     params->base.state = SORT_STATE_RUNNING;
   }
 
-  // Process current state
   while (params->stackSize > 0) {
     QuickState *current = &params->stack[params->stackSize - 1];
 
@@ -202,7 +198,6 @@ void quickSortStep(QuickSortParams *params) {
 
     switch (current->step) {
     case PARTITION_START:
-      // Initialize partition
       current->pivotIndex = current->right;
       current->i = current->left - 1;
       current->j = current->left;
@@ -210,14 +205,12 @@ void quickSortStep(QuickSortParams *params) {
       return;
 
     case PARTITION_PROCESS:
-      // Partition array elements
       if (current->j < current->right) {
         params->base.comparisons++;
         if (params->base.array[current->j] <=
             params->base.array[current->pivotIndex]) {
           current->i++;
           if (current->i != current->j) {
-            // Swap elements
             int temp = params->base.array[current->i];
             params->base.array[current->i] = params->base.array[current->j];
             params->base.array[current->j] = temp;
@@ -229,7 +222,6 @@ void quickSortStep(QuickSortParams *params) {
         return;
       }
 
-      // Place pivot in final position
       current->i++;
       if (current->i != current->pivotIndex) {
         int temp = params->base.array[current->i];
@@ -244,7 +236,6 @@ void quickSortStep(QuickSortParams *params) {
       return;
 
     case HANDLE_LEFT:
-      // Handle left subarray
       current->step = HANDLE_RIGHT;
       if (current->left < current->i - 1) {
         params->stack[params->stackSize++] = (QuickState){
@@ -253,7 +244,6 @@ void quickSortStep(QuickSortParams *params) {
       return;
 
     case HANDLE_RIGHT:
-      // Handle right subarray
       params->stackSize--;
       if (current->i + 1 < current->right) {
         params->stack[params->stackSize++] = (QuickState){

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
+#include <time.h>
 #include <unistd.h>
 
 void signalHandlerTerminal(int signal) {
@@ -35,6 +36,11 @@ void drawFullArrayTerminal(SortParamsUnion *params) {
   for (int i = 0; i < size; i++) {
     drawBarTerminal(i, array[i], WHITE);
   }
+  if (params->base.state == SORT_STATE_FINISHED) {
+    for (int i = 0; i < size; i++) {
+      drawBarTerminal(i, array[i], GREEN);
+    }
+  }
 }
 
 void drawIndicatorsTerminal(SortParamsUnion *params) {
@@ -45,7 +51,7 @@ void drawIndicatorsTerminal(SortParamsUnion *params) {
          : params->base.state == SORT_STATE_PAUSED   ? "PAUSED"
                                                      : "IDLE",
          params->base.size, params->base.comparisons, RED, params->base.swaps,
-         RESET, GREEN, params->base.inserts, RESET);
+         RESET, ORANGE, params->base.inserts, RESET);
 }
 
 void updateArrayTerminal(SortParamsUnion *params) {
@@ -77,12 +83,12 @@ void updateArrayTerminal(SortParamsUnion *params) {
 
   if (params->base.insert_params.index >= 0)
     drawBarTerminal(params->base.insert_params.index,
-                    array[params->base.insert_params.index], GREEN);
+                    array[params->base.insert_params.index], ORANGE);
 
   fflush(stdout);
 }
 
-void doSortInTerminal(SortType type, int sleep_time) {
+void doSortInTerminal(SortType type) {
   signal(SIGINT, signalHandlerTerminal);
 
   struct winsize w;
@@ -91,35 +97,42 @@ void doSortInTerminal(SortType type, int sleep_time) {
   cols = w.ws_col;
 
   SortParamsUnion params;
-  initBaseParams(&params.base, cols, sleep_time, type);
+  initBaseParams(&params.base, cols, type);
 
   clear_window();
   hide_cursor();
   drawFullArrayTerminal(&params);
 
-  while (params.base.state != SORT_STATE_FINISHED) {
-    switch (params.base.type) {
-    case BUBBLE:
-      bubbleSortStep(&params.bubble);
-      break;
-    case SELECTION:
-      selectionSortStep(&params.selection);
-      break;
-    case INSERTION:
-      insertionSortStep(&params.insertion);
-      break;
-    case MERGE:
-      mergeSortStep(&params.merge);
-      break;
-    case QUICK:
-      quickSortStep(&params.quick);
-      break;
-    default:
-      break;
-    }
+  double update_interval = 1.0 / REFRESH_RATE;
+  double last_update = (double)clock() / CLOCKS_PER_SEC;
 
-    updateArrayTerminal(&params);
-    sleep(params.base.sleep_time);
+  while (params.base.state != SORT_STATE_FINISHED) {
+    double current_time = (double)clock() / CLOCKS_PER_SEC;
+
+    if (current_time - last_update >= update_interval) {
+      switch (params.base.type) {
+      case BUBBLE:
+        bubbleSortStep(&params.bubble);
+        break;
+      case SELECTION:
+        selectionSortStep(&params.selection);
+        break;
+      case INSERTION:
+        insertionSortStep(&params.insertion);
+        break;
+      case MERGE:
+        mergeSortStep(&params.merge);
+        break;
+      case QUICK:
+        quickSortStep(&params.quick);
+        break;
+      default:
+        break;
+      }
+
+      updateArrayTerminal(&params);
+      last_update = current_time;
+    }
   }
 
   drawFullArrayTerminal(&params);

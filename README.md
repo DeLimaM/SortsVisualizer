@@ -1,4 +1,4 @@
-# A small command-line utility to visualize sorting algorithms.
+# A small command-line utility to visualize sorting algorithms, both from the terminal and from a dedicated window.
 
 ## Install
 
@@ -15,13 +15,16 @@ Additional options such as **clean**, **rebuild** and **reinstall** are also ava
 
 ## Usage :
 
-```Usage: sortviz [OPTIONS]
+```
+Usage: sortviz [OPTIONS]\n");
   Options:
     --bubble, -b
     --selection, -s
     --insertion, -i
     --quick, -q
     --merge, -m
-    --stime <value>
-  Example: sortviz --bubble --stime 50
+    --gui <do the sort in a dedicated window>
+    -size <size of the array (only accounted for in the gui mode)>
+  Example: sortviz --bubble
+           sortviz -b --gui
 ```
