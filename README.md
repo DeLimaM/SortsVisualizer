@@ -1,4 +1,4 @@
-# A small command-line utility to visualize sorting algorithms, both from the terminal and from a dedicated window.
+# A small command-line utility to visualize sorting algorithms.
 
 ## Install
 
