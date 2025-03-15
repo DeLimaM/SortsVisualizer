@@ -2,6 +2,14 @@
 
 ## Install
 
+### Dependencies
+
+#### Using APT :
+
+`sudo apt install libgl1-mesa-dev`
+
+#### Build
+
 After opening a terminal in the directory of the project, you can build the the project :\
 `make`
 
