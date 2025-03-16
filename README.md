@@ -8,7 +8,7 @@
 
 `sudo apt install libgl1-mesa-dev`
 
-#### Build
+#### Building
 
 After opening a terminal in the directory of the project, you can build the the project :\
 `make`
@@ -24,7 +24,7 @@ Additional options such as **clean**, **rebuild** and **reinstall** are also ava
 ## Usage :
 
 ```
-Usage: sortviz [OPTIONS]\n");
+Usage: sortviz [OPTIONS]
   Options:
     --bubble, -b
     --selection, -s
