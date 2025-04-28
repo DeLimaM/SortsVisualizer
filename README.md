@@ -4,9 +4,11 @@
 
 ### Dependencies
 
+It is necessary to install the raylib dependencies.
+
 #### Using APT :
 
-`sudo apt install libgl1-mesa-dev`
+`sudo apt-get install build-essential git libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev libgl1-mesa-dev`
 
 #### Building
 
