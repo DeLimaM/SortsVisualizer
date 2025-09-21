@@ -94,7 +94,7 @@ void doSortInGUI(SortType type, int array_size) {
   SetExitKey(KEY_NULL);
   SetTargetFPS(60);
 
-  font = LoadFontEx("fonts/LexendExa.ttf", INDICATORS_FONT_SIZE, NULL, 0);
+  font = LoadFontEx("fonts/Iosevka.ttf", INDICATORS_FONT_SIZE, NULL, 0);
 
   SortParamsUnion params;
   initBaseParams(&params.base, array_size, type);
